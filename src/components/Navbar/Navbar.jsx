@@ -8,7 +8,7 @@ const { Header } = Layout;
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const isAuthenticated = false;
+  const isAuthenticated = true;
 
   const handleNavigation = (href, message) => {
     localStorage.setItem("navMessage", message);
@@ -118,7 +118,7 @@ export default function Navbar() {
       <Header className="flex justify-between items-center bg-green-500 p-4">
         <div className="logo">
           <Link to="/paginaprincipal">
-            <img src="https://univerperu.com/wp-content/uploads/2023/07/Universidad-Nacional-de-San-Martin-UNSM.png" alt="Your Company" className="h-16" />
+            <img src="https://unsm.edu.pe/wp-content/uploads/2022/03/escudologotipo_unsm_2021_lateral_principal_siglas_PNG-370x142.png" alt="Your Company" className="h-16" />
           </Link>
         </div>
         <Menu
