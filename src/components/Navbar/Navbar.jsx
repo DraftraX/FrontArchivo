@@ -8,7 +8,7 @@ const { Header } = Layout;
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const isAuthenticated = !!localStorage.getItem("token");
+  const isAuthenticated = true;
 
   const handleNavigation = (href, message) => {
     localStorage.setItem("navMessage", message);
