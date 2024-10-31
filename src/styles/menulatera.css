@@ -1,0 +1,14 @@
+.box{
+    width: 20vw;
+}
+.header{
+    background-color: #43da6b;
+}
+
+.contenido-general{
+    height: 100vh !important;
+    width: 100vw !important;
+}
+.footer{
+    height: 30vh;
+}

@@ -1,0 +1,19 @@
+.Login{
+    height: 100vh;
+
+    .formato{
+        position: relative;
+        display: grid;
+        align-items: center;
+        top: 10vh;
+        height: 80vh;
+        border-radius: 20px 20px 20px 20px;
+    }
+    .form{
+        display: grid;
+        justify-content: center;
+        h3{
+            font-size: small;
+        }
+    }
+}
