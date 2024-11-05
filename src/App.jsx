@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import IniciarSesion from "./modules/Seguridad/IniciarSesion/IniciarSesion";
 import RestablecerContrasena from "./modules/Seguridad/RestablecerContraseña/RestablecerContrasena";
 import NuevaContrasena from "./modules/Seguridad/NuevaContraseña/NuevaContrasena";
+import CambiarContrasena from "./modules/Seguridad/NuevaContraseña/UpdatePassword";
 import PaginaPrincipal from "./modules/Seguridad/PaginaPrincipal/PaginaPrincipal";
 import CrearUsuario from "./modules/Seguridad/CrearUsuario";
 import PerfilUsuario from "./modules/Seguridad/PerfilUsuario";
@@ -48,6 +49,7 @@ function App() {
           <Route path="/login" element={<IniciarSesion />} />
           <Route path="/restore" element={<RestablecerContrasena />} />
           <Route path="/newpassword" element={<NuevaContrasena />} />
+          <Route path="/updatepassword" element={<CambiarContrasena />} />
           <Route path="/paginaprincipal" element={<PaginaPrincipal />} />
           <Route path="/perfil" element={<PerfilUsuario />} />
           <Route path="/create" element={<CrearUsuario />} />

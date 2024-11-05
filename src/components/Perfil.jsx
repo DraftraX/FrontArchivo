@@ -106,7 +106,7 @@ const Perfil = () => {
                 type="dashed"
                 icon={<SettingOutlined />}
                 block
-                onClick={() => navigate("/newpassword")}
+                onClick={() => navigate("/updatepassword")}
               >
                 Actualizar Contraseña
               </Button>

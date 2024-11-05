@@ -5,25 +5,11 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import Swal from "sweetalert2";
 import { API_URL } from "../../../utils/ApiRuta";
 
-export default function NuevaContrasena() {
+export default function UpdatePassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailTo, setEmailTo] = useState("");
   const [passwordValid, setPasswordValid] = useState(false);
-
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    const email = query.get("emailTo");
-    if (email) {
-      setEmailTo(email);
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "No se ha proporcionado el correo electrónico.",
-      });
-    }
-  }, []);
 
   useEffect(() => {
     // Verificar los requisitos de la contraseña
