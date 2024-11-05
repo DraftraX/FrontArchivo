@@ -106,7 +106,7 @@ const Perfil = () => {
                 type="dashed"
                 icon={<SettingOutlined />}
                 block
-                onClick={() => navigate("/updatepassword")}
+                onClick={() => navigate("/newpassword")}
               >
                 Actualizar Contraseña
               </Button>
@@ -114,7 +114,7 @@ const Perfil = () => {
                 type="dashed"
                 icon={<SettingOutlined />}
                 block
-                onClick={() => navigate("/updatepassword")}
+                onClick={() => navigate("/permisos")}
               >
                 Roles y Permisos
               </Button>
