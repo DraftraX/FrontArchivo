@@ -233,7 +233,7 @@ const FormularioDocumento = () => {
     <div className="h-full">
       <Card style={{ maxWidth: 800, margin: "0 auto", padding: 24 }}>
         <Title level={2} style={{ textAlign: "center" }}>
-          Formulario de Documento
+          Formulario de Resolucion
         </Title>
         <Form
           id="msform"

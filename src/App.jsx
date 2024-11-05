@@ -11,6 +11,8 @@ import PerfilUsuario from "./modules/Seguridad/PerfilUsuario";
 import CrearResolucion from "./modules/Seguridad/CrearResolucion";
 import CrearGrado from "./modules/Seguridad/CrearGrado";
 import CrearPosgrado from "./modules/Seguridad/CrearPosgrado";
+import RegistrarVisita from "./modules/Seguridad/RegistrarVisita/RegistrarVisita";
+import Permisos from "./modules/Seguridad/Permisos/Permisos";
 
 // RESOLUCIONES
 import VistaResoluciones from "./modules/Resoluciones/VistaResoluciones";
@@ -21,8 +23,8 @@ import VistaGrados from "./modules/GradosyTItulos/VistaGrados";
 import VerGrado from "./modules/GradosyTItulos/VerGrado";
 import VistaPosgrados from "./modules/GradosyTItulos/VistaPosgrados";
 import VerPosgrado from "./modules/GradosyTItulos/VerPosgrado";
-import Reportes from "./components/ReportePrueba/Reporte";
-import RutasProtegidas from "./utils/RutasProtegida";
+import ReportesDocumentos from "./components/ReporteDocumentos/ReporteDocumentos";
+import ReportesVisitantes from "./components/ReporteVisitantes/ReporteVisitantes";
 
 function App() {
   useEffect(() => {
@@ -58,37 +60,14 @@ function App() {
           <Route path="/posgrados" element={<VistaPosgrados />} />
           <Route path="/verposgrado" element={<VerPosgrado />} />
           <Route path="/createposgrado" element={<CrearPosgrado />} />
-          <Route path="/reportes" element={<Reportes />} />
-
-          {/* Rutas protegidas */}
-          {/* <Route element={<RutasProtegidas />}>
-            <Route path="/paginaprincipal" element={<PaginaPrincipal />} />
-            <Route path="/perfil" element={<PerfilUsuario />} />
-            <Route path="/create" element={<CrearUsuario />} />
-            <Route path="/resoluciones" element={<VistaResoluciones />} />
-            <Route path="/verresolucion" element={<VerResolucion />} />
-            <Route path="/createresolucion" element={<CrearResolucion />} />
-            <Route path="/grados" element={<VistaGrados />} />
-            <Route path="/vergrado" element={<VerGrado />} />
-            <Route path="/creategrado" element={<CrearGrado />} />
-            <Route path="/posgrados" element={<VistaPosgrados />} />
-            <Route path="/verposgrado" element={<VerPosgrado />} />
-            <Route path="/createposgrado" element={<CrearPosgrado />} />
-          </Route> */}
+          <Route path="/reportes-documentos" element={<ReportesDocumentos />} />
+          <Route path="/reportes-visitantes" element={<ReportesVisitantes />} />
+          <Route path="/visita" element={<RegistrarVisita />} />
+          <Route path="/permisos" element={<Permisos />} />
         </Routes>
       </div>
     </BrowserRouter>
   );
 }
-
-// function Navigatiion(){
-//   return  <nav>
-//     <ul>
-//       <li>
-//         <Link></Link>
-//       </li>
-//     </ul>
-//   </nav>
-// }
 
 export default App;

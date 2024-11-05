@@ -18,6 +18,7 @@ import {
   IdcardOutlined,
   PlusOutlined,
   SettingOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
@@ -25,28 +26,20 @@ const { Title, Paragraph } = Typography;
 const Perfil = () => {
   const navigate = useNavigate();
 
-  // Simulando el token y el nombre de usuario
   const token = "simulatedToken";
   const username = "simulatedUser";
 
-  // Datos de prueba
   const [userData, setUserData] = useState({
     id: "1",
     name: "Eduardo Diego",
     lastname: "Sanchez Vidaurre",
     address: "Jr. Los Pinos 1223, Lima",
     phone: "+51 929 455 391",
+    correo: "eduAgarCrackPumbaJumbo@gmail.com  ",
     fotoPerfil:
       "https://scontent.flim19-1.fna.fbcdn.net/v/t1.18169-9/15977424_1407659015944818_4808128750698341533_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=53a332&_nc_eui2=AeEYEjNjdHNWKpcPLyfkZ3IX0zt4U9LkBfbTO3hT0uQF9tyr7ejH7aHBWo8s69-fzzbV-HNy3ndpTenxu8tXhuMZ&_nc_ohc=CtbRpmVU4_cQ7kNvgEmFcZL&_nc_zt=23&_nc_ht=scontent.flim19-1.fna&oh=00_AYC_y1M8JEPDqvIOjG6j9_eLcVA31i2nTJjXZB7eyNGWug&oe=673F3DB0",
     cargoid: "Desarrollador Web",
   });
-
-  // El useEffect se mantiene, pero ahora no hace la llamada a la API.
-  useEffect(() => {
-    // Aquí podrías hacer algo cuando el componente se monte
-    // Por ejemplo, podrías configurar los datos del usuario desde un archivo local o similar.
-    // setUserData(mockUserData); // Aquí podrías asignar datos simulados si lo deseas
-  }, []);
 
   return (
     <div style={{ backgroundColor: "#f0f2f5", padding: "40px" }}>
@@ -97,9 +90,33 @@ const Perfil = () => {
                 type="dashed"
                 icon={<SettingOutlined />}
                 block
+                onClick={() => navigate("/visita")}
+              >
+                Registrar Visita
+              </Button>
+              <Button
+                type="dashed"
+                icon={<SettingOutlined />}
+                block
                 onClick={() => navigate("/create")}
               >
                 Crear usuario
+              </Button>
+              <Button
+                type="dashed"
+                icon={<SettingOutlined />}
+                block
+                onClick={() => navigate("/updatepassword")}
+              >
+                Actualizar Contraseña
+              </Button>
+              <Button
+                type="dashed"
+                icon={<SettingOutlined />}
+                block
+                onClick={() => navigate("/updatepassword")}
+              >
+                Roles y Permisos
               </Button>
             </Space>
           </Card>
@@ -134,6 +151,12 @@ const Perfil = () => {
                 <Space>
                   <HomeOutlined />
                   <Paragraph>{userData.address}</Paragraph>
+                </Space>
+              </Descriptions.Item>
+              <Descriptions.Item label="Correo" span={3}>
+                <Space>
+                  <HomeOutlined />
+                  <Paragraph>{userData.correo}</Paragraph>
                 </Space>
               </Descriptions.Item>
             </Descriptions>

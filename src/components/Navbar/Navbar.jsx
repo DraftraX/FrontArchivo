@@ -1,5 +1,9 @@
 import { Menu, Dropdown, Layout, message } from "antd";
-import { UserOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  ArrowLeftOutlined,
+  SnippetsOutlined,
+} from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { API_URL } from "../../utils/ApiRuta";
 import { navigation } from "./Data";
@@ -94,19 +98,35 @@ export default function Navbar() {
       ),
     },
     {
-      key: "reportes",
+      key: "Reporte Visitantes",
       label: (
-        <a href="/reportes" className="flex items-center">
-          <UserOutlined className="mr-2" />
-          Reportes
+        <a
+          onClick={() => handleNavigation("/reportes-visitantes", "Visitantes")}
+          className="flex items-center"
+        >
+          <SnippetsOutlined className="mr-2" />
+          Reporte Visitantes
         </a>
       ),
     },
     {
+      key: "Reporte Documentos",
+      label: (
+        <a
+          onClick={() => handleNavigation("/reportes-documentos", "Documentos")}
+          className="flex items-center"
+        >
+          <SnippetsOutlined className="mr-2" />
+          Reporte Documentos
+        </a>
+      ),
+    },
+
+    {
       key: "logout",
       label: (
-        <a onClick={handleLogout} className="flex items-center">
-          <ArrowLeftOutlined className="mr-2" />
+        <a href="/login" onClick={handleLogout} className="flex items-center">
+          <ArrowLeftOutlined className="mr-2 " />
           Cerrar sesión
         </a>
       ),
@@ -118,7 +138,7 @@ export default function Navbar() {
       <Header className="flex justify-between items-center bg-green-500 p-4">
         <div className="logo">
           <Link to="/paginaprincipal">
-            <img src="https://unsm.edu.pe/wp-content/uploads/2022/03/escudologotipo_unsm_2021_lateral_principal_siglas_PNG-370x142.png" alt="Your Company" className="h-16" />
+            <img src="https://unsm.edu.pe/wp-content/uploads/2022/03/escudo_unsm_2021_colores_PNG-370x426.png" alt="Your Company" className="h-16" />
           </Link>
         </div>
         <Menu
@@ -130,7 +150,7 @@ export default function Navbar() {
         {isAuthenticated && (
           <Dropdown
             overlay={
-              <Menu items={userMenuItems} className="bg-white text-black" />
+              <Menu items={userMenuItems} className="bg-white text-blacks" />
             }
             trigger={["click"]}
           >
