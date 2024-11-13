@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Form, Input, Button, Card, Row, Col, message } from "antd";
-import { Link, useNavigate } from "react-router-dom"; // Importa useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import ReCAPTCHA from "react-google-recaptcha";
+import Swal from "sweetalert2";
+import { API_URL } from "../../../../url";
 
 const loginSchema = z.object({
   username: z
@@ -17,7 +19,7 @@ export default function IniciarSesion() {
   const [password, setPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState(null);
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const navigate = useNavigate();
 
   const handleChangeUsername = (value) => {
     setUsername(value);
@@ -47,15 +49,56 @@ export default function IniciarSesion() {
         return;
       }
 
-      // Simulación de éxito en el inicio de sesión
-      localStorage.setItem("username", values.username);
-      message.success("Inicio de sesión exitoso");
+      const data = {
+        username: values.username,
+        password: values.password,
+        recaptchaResponse: captchaToken,
+      };
 
-      // Redirigir a la página principal
-      navigate("/paginaprincipal"); // Navega a la página principal
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Respuesta del servidor:", data);
+
+        // Almacenar el token en localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("role", data.role);
+
+        // Mostrar mensaje de éxito con SweetAlert2
+        Swal.fire({
+          icon: "success",
+          title: "Inicio de sesión exitoso",
+          text: "Bienvenido al sistema",
+          confirmButtonText: "Continuar",
+        }).then(() => {
+          // Redirigir después de cerrar SweetAlert2
+          navigate("/paginaprincipal");
+        });
+      } else {
+        const errorData = await response.json();
+        Swal.fire({
+          icon: "error",
+          title: "Error al iniciar sesión",
+          text: errorData.message || "Error al iniciar sesión",
+          confirmButtonText: "Intentar de nuevo",
+        });
+      }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
-      message.error("Error al iniciar sesión");
+      Swal.fire({
+        icon: "error",
+        title: "Error al iniciar sesión",
+        text: "Ha ocurrido un error. Inténtelo nuevamente.",
+        confirmButtonText: "Cerrar",
+      });
     }
   };
 

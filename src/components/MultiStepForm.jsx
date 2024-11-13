@@ -41,9 +41,10 @@ const MultiStepForm = () => {
     const UsuarioRequest = {
       name: fname,
       lastname: lname,
-      address,
+      dni: dname,
+      address: address,
       cargoid: 1,
-      phone,
+      phone: phone,
       username: email,
       password: pass,
     };

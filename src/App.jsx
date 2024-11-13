@@ -27,13 +27,16 @@ import VerPosgrado from "./modules/GradosyTItulos/VerPosgrado";
 import ReportesDocumentos from "./components/ReporteDocumentos/ReporteDocumentos";
 import ReportesVisitantes from "./components/ReporteVisitantes/ReporteVisitantes";
 
+import PrivateRoute from "./components/PrivateRoute";
+
 function App() {
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      const isFirstTime = localStorage.getItem("isFirstTime");
+  useEffect(() =>
+  {
+    if (process.env.NODE_ENV === 'development') {
+      const isFirstTime = localStorage.getItem('isFirstTime');
       if (!isFirstTime) {
         localStorage.clear();
-        localStorage.setItem("isFirstTime", "true");
+        localStorage.setItem('isFirstTime', 'true');
       }
     }
   }, []);
@@ -49,23 +52,25 @@ function App() {
           <Route path="/login" element={<IniciarSesion />} />
           <Route path="/restore" element={<RestablecerContrasena />} />
           <Route path="/newpassword" element={<NuevaContrasena />} />
-          <Route path="/updatepassword" element={<CambiarContrasena />} />
-          <Route path="/paginaprincipal" element={<PaginaPrincipal />} />
-          <Route path="/perfil" element={<PerfilUsuario />} />
-          <Route path="/create" element={<CrearUsuario />} />
-          <Route path="/resoluciones" element={<VistaResoluciones />} />
-          <Route path="/verresolucion" element={<VerResolucion />} />
-          <Route path="/createresolucion" element={<CrearResolucion />} />
-          <Route path="/grados" element={<VistaGrados />} />
-          <Route path="/vergrado" element={<VerGrado />} />
-          <Route path="/creategrado" element={<CrearGrado />} />
-          <Route path="/posgrados" element={<VistaPosgrados />} />
-          <Route path="/verposgrado" element={<VerPosgrado />} />
-          <Route path="/createposgrado" element={<CrearPosgrado />} />
-          <Route path="/reportes-documentos" element={<ReportesDocumentos />} />
-          <Route path="/reportes-visitantes" element={<ReportesVisitantes />} />
-          <Route path="/visita" element={<RegistrarVisita />} />
-          <Route path="/permisos" element={<Permisos />} />
+
+          {/* Rutas protegidas */}
+          <Route path="/updatepassword" element={<PrivateRoute><CambiarContrasena /></PrivateRoute>} />
+          <Route path="/paginaprincipal" element={<PrivateRoute><PaginaPrincipal /></PrivateRoute>} />
+          <Route path="/perfil" element={<PrivateRoute><PerfilUsuario /></PrivateRoute>} />
+          <Route path="/create" element={<PrivateRoute><CrearUsuario /></PrivateRoute>} />
+          <Route path="/resoluciones" element={<PrivateRoute><VistaResoluciones /></PrivateRoute>} />
+          <Route path="/verresolucion" element={<PrivateRoute><VerResolucion /></PrivateRoute>} />
+          <Route path="/createresolucion" element={<PrivateRoute><CrearResolucion /></PrivateRoute>} />
+          <Route path="/grados" element={<PrivateRoute><VistaGrados /></PrivateRoute>} />
+          <Route path="/vergrado" element={<PrivateRoute><VerGrado /></PrivateRoute>} />
+          <Route path="/creategrado" element={<PrivateRoute><CrearGrado /></PrivateRoute>} />
+          <Route path="/posgrados" element={<PrivateRoute><VistaPosgrados /></PrivateRoute>} />
+          <Route path="/verposgrado" element={<PrivateRoute><VerPosgrado /></PrivateRoute>} />
+          <Route path="/createposgrado" element={<PrivateRoute><CrearPosgrado /></PrivateRoute>} />
+          <Route path="/reportes-documentos" element={<PrivateRoute><ReportesDocumentos /></PrivateRoute>} />
+          <Route path="/reportes-visitantes" element={<PrivateRoute><ReportesVisitantes /></PrivateRoute>} />
+          <Route path="/visita" element={<PrivateRoute><RegistrarVisita /></PrivateRoute>} />
+          <Route path="/permisos" element={<PrivateRoute><Permisos /></PrivateRoute>} />
         </Routes>
       </div>
     </BrowserRouter>
