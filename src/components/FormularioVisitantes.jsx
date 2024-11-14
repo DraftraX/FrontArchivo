@@ -1,33 +1,28 @@
 import React, { useState } from "react";
 import "../styles/MultiStepForm.css";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   Form,
   Input,
   Button,
   DatePicker,
-  Upload,
   Space,
   Typography,
   Card,
-  message,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import { API_URL } from "../utils/ApiRuta";
+import { API_URL } from "../../url";
 import { z } from "zod";
 
 const { Title } = Typography;
 
 // Define the document schema
 const documentSchema = z.object({
-  nombreapellido: z.string().nonempty("El nombre y apellido son obligatorios"),
-  dni: z.string().nonempty("El DNI es obligatorio"),
-  fechaexpedicion: z.string().nonempty("La fecha de expedición es obligatoria"),
-  maestriadoctorado: z
-    .string()
-    .nonempty("El grado de maestría o doctorado es obligatorio"),
-  idresolucion: z.string().nonempty("La resolución es obligatoria"),
-  pdf: z.any().nullable(),
+  visitante: z.string().nonempty("El nombre del visitante es obligatorio"),
+  ocupacion: z.string().nonempty("La ocupación es obligatoria"),
+  fecha: z.string().nonempty("La fecha de visita es obligatoria"),
+  motivo: z.string().nonempty("El motivo es obligatorio"),
+  correotelefono: z.string().nonempty("El correo o teléfono es obligatorio"),
 });
 
 const FormularioVisitantes = () => {
@@ -35,66 +30,57 @@ const FormularioVisitantes = () => {
   const token = localStorage.getItem("token");
 
   const [Request, setRequest] = useState({
-    nombreapellido: "",
-    dni: "",
-    fechaexpedicion: "",
-    maestriadoctorado: "",
-    idresolucion: "",
-    pdf: null,
+    visitante: "",
+    ocupacion: "",
+    fecha: "",
+    motivo: "",
+    correotelefono: "",
   });
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "pdf" && files) {
-      setRequest({ ...Request, pdf: files[0] });
-    } else {
-      setRequest({ ...Request, [name]: value });
-    }
-  };
 
   const handleSubmit = async (values) => {
     try {
       const parsedValues = {
         ...values,
-        fechaexpedicion: values.fechaexpedicion.format("YYYY-MM-DD"),
-        pdf: Request.pdf,
+        fecha: values.fecha.format("YYYY-MM-DD"),
       };
 
+      // Validate form data with schema
       documentSchema.parse(parsedValues);
 
-      const formData = new FormData();
-      formData.append("nombreapellido", values.nombreapellido);
-      formData.append("dni", values.dni);
-      formData.append("fechaexpedicion", parsedValues.fechaexpedicion);
-      formData.append("maestriadoctorado", values.maestriadoctorado);
-      formData.append("idresolucion", values.idresolucion);
-      if (Request.pdf) {
-        formData.append("pdf", Request.pdf);
-      }
+      const username = localStorage.getItem("username");
 
-      console.log(values.maestriadoctorado);
-
-      const response = await fetch(API_URL + "/posgrado/nuevoposgrado", {
+      const jsonData = {
+        nombre: values.visitante,
+        ocupacion: values.ocupacion,
+        fecha: parsedValues.fecha,
+        motivo: values.motivo,
+        numerocorreo: values.correotelefono,
+        username: username,
+      };
+            
+      const response = await fetch(API_URL + "/visita/new", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify(jsonData),
       });
 
       if (response.ok) {
-        message.success("¡Grado creado con éxito!");
-        navigate("/perfil");
+        Swal.fire("¡Éxito!", "¡Visita registrada con éxito!", "success").then(() =>
+          navigate("/perfil")
+        );
       } else {
-        message.error("¡Error al crear el grado!");
+        Swal.fire("Error", "¡Error al registrar la visita!", "error");
       }
     } catch (error) {
       if (error.errors) {
         error.errors.forEach((err) => {
-          message.error(`¡Error al crear el grado! ${err.message}`);
+          Swal.fire("Error", `¡Error al registrar la visita! ${err.message}`, "error");
         });
       } else {
-        message.error(`¡Error al crear el grado! ${error.message}`);
+        Swal.fire("Error", `¡Error al registrar la visita! ${error.message}`, "error");
       }
     }
   };
@@ -126,13 +112,13 @@ const FormularioVisitantes = () => {
                 <Input placeholder="Visitante" />
               </Form.Item>
               <Form.Item
-                label="Ocupacion"
+                label="Ocupación"
                 name="ocupacion"
                 rules={[
-                  { required: true, message: "Debe ingresar la ocupacion" },
+                  { required: true, message: "Debe ingresar la ocupación" },
                 ]}
               >
-                <Input placeholder="Ocupacion" />
+                <Input placeholder="Ocupación" />
               </Form.Item>
             </div>
             <div>
@@ -164,16 +150,16 @@ const FormularioVisitantes = () => {
           </div>
 
           <Form.Item
-            label="Correo o Telefono"
+            label="Correo o Teléfono"
             name="correotelefono"
             rules={[
               {
                 required: true,
-                message: "Debe ingresar un correo o telefono",
+                message: "Debe ingresar un correo o teléfono",
               },
             ]}
           >
-            <Input placeholder="Correo o telefono" />
+            <Input placeholder="Correo o teléfono" />
           </Form.Item>
           <Form.Item>
             <Space style={{ width: "100%", justifyContent: "center" }}>

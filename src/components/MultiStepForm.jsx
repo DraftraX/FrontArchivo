@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Form, Input, Button, Steps, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../utils/ApiRuta";
+import { API_URL } from "../../url";
+import Swal from "sweetalert2";
 const { Step } = Steps;
 
 const MultiStepForm = () => {
@@ -16,6 +17,7 @@ const MultiStepForm = () => {
         const values = await form.validateFields([
           "fname",
           "lname",
+          "dni",
           "address",
           "phone",
         ]);
@@ -37,14 +39,14 @@ const MultiStepForm = () => {
 
   const handleFinish = async (values) => {
     const finalFormData = { ...formData, ...values };
-    const { fname, lname, address, phone, email, pass } = finalFormData;
+    const { fname, lname, dni, address, phone, email, pass } = finalFormData;
     const UsuarioRequest = {
       name: fname,
       lastname: lname,
-      dni: dname,
       address: address,
       cargoid: 1,
       phone: phone,
+      dni: dni,
       username: email,
       password: pass,
     };
@@ -62,20 +64,22 @@ const MultiStepForm = () => {
       });
 
       if (response.ok) {
-        message.success("¡Usuario creado con éxito!");
+        Swal.fire("Success!", "¡Usuario creado con éxito!", "success");
         navigate("/perfil");
       } else {
-        if (response.status === 409) {
-          // Manejar el caso específico de duplicidad de nombre de usuario
-          message.error("El nombre de usuario ya está en uso.");
-        } else {
+        if (response.status === 500) 
+        {
+          Swal.fire("Error", "El nombre de usuario ya está en uso.", "error");
+        } 
+        else
+        {
           const errorData = await response.json();
           console.error("Error response:", errorData);
-          message.error("Hubo un problema al crear el usuario");
+          Swal.fire("Error", "Hubo un problema al crear el usuario", "error");
         }
       }
     } catch (error) {
-      message.error("Hubo un problema al crear el usuario");
+      Swal.fire("Error", "Hubo un problema al crear el usuario", "error");
       console.error("Error al crear el usuario:", error);
     }
   };
@@ -97,6 +101,7 @@ const MultiStepForm = () => {
             address: "",
             email: "",
             pass: "",
+            dni: "",
             cpass: "",
             phone: "",
           }}
@@ -126,6 +131,22 @@ const MultiStepForm = () => {
                 ]}
               >
                 <Input placeholder="Apellido" />
+              </Form.Item>
+              <Form.Item
+                name="dni"
+                label="DNI"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa tu DNI",
+                  },
+                  {
+                    len: 8,
+                    message: "El DNI debe tener 8 dígitos",
+                  },
+                ]}
+              >
+                <Input placeholder="DNI" />
               </Form.Item>
               <Form.Item
                 name="address"
