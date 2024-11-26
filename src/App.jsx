@@ -20,8 +20,8 @@ import VistaResoluciones from "./modules/Resoluciones/VistaResoluciones";
 import VerResolucion from "./modules/Resoluciones/VerResolucion";
 
 // GRADOS Y TITULOS
-import VistaGrados from "./modules/GradosyTItulos/VistaGrados";
-import VerGrado from "./modules/GradosyTItulos/VerGrado";
+import VistaGrados from "./modules/GradosyTItulos/VistaPregrado";
+import VerGrado from "./modules/GradosyTItulos/VerPregrado";
 import VistaPosgrados from "./modules/GradosyTItulos/VistaPosgrados";
 import VerPosgrado from "./modules/GradosyTItulos/VerPosgrado";
 import ReportesDocumentos from "./components/ReporteDocumentos/ReporteDocumentos";

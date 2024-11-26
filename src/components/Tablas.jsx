@@ -2,27 +2,53 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input, Button, Table, Pagination } from "antd";
 import "../styles/Tabla.css";
-import dataDocumentos from "./data/Tablas";
+import { API_URL } from "../utils/ApiRuta";
 
 export default function Tablas() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  const [documentos, setDocumentos] = useState(dataDocumentos); // Establecer datos de prueba
-  const [filteredDocumentos, setFilteredDocumentos] = useState(dataDocumentos);
+  const [documentos, setDocumentos] = useState([]);
+  const [filteredDocumentos, setFilteredDocumentos] = useState([]);
   const [filters, setFilters] = useState({
     nro: "",
     nombre: "",
     fecha: "",
-    subcriterio: "",
   });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElements] = useState(dataDocumentos.length); // Total de documentos
+  const [totalElements, setTotalElements] = useState(0);
+
+  const fetchDocumentos = async (page, size) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/resolucion/verresolucion/`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const data = await response.json();
+      setDocumentos(data.content);
+      setFilteredDocumentos(data.content);
+      setTotalElements(data.totalElements);
+    } catch (error) {
+      console.error("Error al obtener los documentos:", error);
+    }
+  };
 
   useEffect(() => {
-    // Filtrado de documentos basado en filtros
+    fetchDocumentos(currentPage, pageSize);
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
     const filtered = documentos.filter((doc) => {
       return (
         (filters.nro ? doc.nrodoc.includes(filters.nro) : true) &&
@@ -33,8 +59,7 @@ export default function Tablas() {
       );
     });
     setFilteredDocumentos(filtered);
-    setTotalElements(filtered.length); // Actualiza el total de elementos después de filtrar
-    setCurrentPage(1); // Reinicia la página actual al cambiar filtros
+    setTotalElements(filtered.length);
   }, [filters, documentos]);
 
   const handleFilterChange = (e) => {
@@ -49,7 +74,6 @@ export default function Tablas() {
       nro: "",
       nombre: "",
       fecha: "",
-      subcriterio: "",
     });
   };
 
@@ -59,7 +83,7 @@ export default function Tablas() {
   };
 
   const handleChangePage = (page) => {
-    setCurrentPage(page); // Actualiza la página actual
+    setCurrentPage(page);
   };
 
   const columns = [
@@ -128,10 +152,7 @@ export default function Tablas() {
         </Button>
       </div>
       <Table
-        dataSource={filteredDocumentos.slice(
-          (currentPage - 1) * pageSize,
-          currentPage * pageSize
-        )}
+        dataSource={filteredDocumentos}
         columns={columns}
         rowKey="nrodoc"
         className="custom-table"

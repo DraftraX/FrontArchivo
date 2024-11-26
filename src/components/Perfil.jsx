@@ -21,7 +21,7 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 
-import { API_URL } from "../../url";
+import { API_URL } from "../utils/ApiRuta";
 
 const { Title, Paragraph } = Typography;
 

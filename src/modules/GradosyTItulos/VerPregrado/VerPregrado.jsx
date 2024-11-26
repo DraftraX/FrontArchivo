@@ -1,14 +1,14 @@
 import React from "react";
 import Navbar from "../../../components/Navbar/Navbar";
-import Tablas from "../../../components/TablaGrado";
+import Documento from "../../../components/DocumentoGrado";
 
-export function VistaGrados() {
+export function VerPregrado() {
   return (
     <div>
       <Navbar />
-      <Tablas />
+      <Documento />
     </div>
   );
 }
 
-export default VistaGrados;
+export default VerPregrado;

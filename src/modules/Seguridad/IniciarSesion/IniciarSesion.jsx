@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import ReCAPTCHA from "react-google-recaptcha";
 import Swal from "sweetalert2";
-import { API_URL } from "../../../../url";
+import { API_URL } from "../../../utils/ApiRuta";
 
 const loginSchema = z.object({
   username: z

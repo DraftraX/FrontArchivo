@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Spin, Divider, Table } from "antd";
-// import { API_URL } from "../utils/ApiRuta";
+import { API_URL } from "../utils/ApiRuta";
 
 export default function DocumentoDetalle() {
   const [documento, setDocumento] = useState(null);
@@ -8,67 +8,43 @@ export default function DocumentoDetalle() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // const documentId = localStorage.getItem("documentId");
-  // const token = localStorage.getItem("token");
+  const documentId = localStorage.getItem("documentId");
+  const token = localStorage.getItem("token");
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `${API_URL}/resolucion/verresolucion/${documentId}`,
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-  //       if (!response.ok) {
-  //         throw new Error("Error al obtener el documento");
-  //       }
-  //       const data = await response.json();
-  //       setDocumento(data);
-  //     } catch (error) {
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/resolucion/verresolucion/${documentId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-  //   if (documentId && token) {
-  //     fetchData();
-  //   }
-  // }, [documentId, token]);
+        if (!response.ok) {
+          throw new Error("Error al obtener los datos del documento");
+        }
 
-  // useEffect(() => {
-  //   const fetchPdf = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `${API_URL}/resolucion/verresolucion/${documentId}/pdf`,
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-  //       if (!response.ok) {
-  //         throw new Error("Error al obtener el PDF del documento");
-  //       }
-  //       const pdfBlob = await response.blob();
-  //       const pdfUrl = URL.createObjectURL(pdfBlob);
-  //       setPdfUrl(pdfUrl);
-  //     } catch (error) {
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+        const data = await response.json();
+        setDocumento(data);
+        setPdfUrl(data.link);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   if (documentId && token) {
-  //     fetchPdf();
-  //   }
-  // }, [documentId, token]);
+    if (documentId && token) {
+      fetchData();
+    } else {
+      setError("No se encontró el ID del documento o el token.");
+      setLoading(false);
+    }
+  }, [documentId, token]);
 
   if (loading) {
     return (
@@ -94,7 +70,6 @@ export default function DocumentoDetalle() {
     );
   }
 
-  // Definir columnas y datos para la tabla de detalles del documento
   const columns = [
     {
       title: "Campo",
@@ -165,12 +140,15 @@ export default function DocumentoDetalle() {
           />
         </div>
         <div className="border border-gray-200 rounded-lg p-4">
-          {pdfUrl && (
-            <embed
-              className="w-full h-full"
+          {pdfUrl ? (
+            <iframe
+              className="w-full h-96"
               src={pdfUrl}
-              type="application/pdf"
+              title="Documento PDF"
+              frameBorder="0"
             />
+          ) : (
+            <div>No se pudo cargar el documento PDF.</div>
           )}
         </div>
       </div>

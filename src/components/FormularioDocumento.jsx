@@ -30,7 +30,10 @@ const documentSchema = z.object({
   duracion: z.number().min(1, "La duración debe ser mayor a 0").optional(),
   tipoResolucion: z.string().nonempty("El tipo de resolución es obligatorio"),
   idtipocriterio: z.number().min(1, "El criterio es obligatorio"),
-  pdf: z.any().nullable(),
+  link: z
+    .string()
+    .url("Debe ingresar un enlace válido")
+    .nonempty("El link es obligatorio"), 
 });
 
 const FormularioDocumento = () => {
@@ -45,7 +48,7 @@ const FormularioDocumento = () => {
     duracion: 1,
     tipoResolucion: "",
     idtipocriterio: 0,
-    pdf: null,
+    link: "",
   });
 
   const [criterios, setCriterios] = useState([]);
@@ -132,17 +135,6 @@ const FormularioDocumento = () => {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value, files, type, checked } = e.target;
-    if (name === "pdf" && files) {
-      setRequest({ ...Request, pdf: files[0] });
-    } else if (type === "checkbox") {
-      setRequest({ ...Request, [name]: checked ? value : "" });
-    } else {
-      setRequest({ ...Request, [name]: value });
-    }
-  };
-
   const handleTipoResolucionChange = (e) => {
     const tipoResolucion = e.target.value;
     setRequest((prev) => ({ ...prev, tipoResolucion }));
@@ -165,29 +157,26 @@ const FormularioDocumento = () => {
   const handleSubmit = async (values) => {
     try {
       const idtipocriterio =
-        subSubCriterios.length > 0
-          ? selectedSubSubCriterio
-          : selectedSubCriterio;
-      console.log(idtipocriterio);
+        subSubCriterios.length > 0 ? selectedSubSubCriterio : selectedSubCriterio;
       if (!idtipocriterio) {
         message.error("Debe seleccionar un criterio válido.");
         return;
       }
+      
+      const usuario = localStorage.getItem("username");
 
       const parsedValues = {
         ...values,
         fecha: values.fecha.format("YYYY-MM-DD"),
         duracion:
-          Request.tipoResolucion === "Temporal"
-            ? Number(values.duracion)
-            : undefined,
-        pdf: Request.pdf,
+          Request.tipoResolucion === "Temporal" ? Number(values.duracion) : undefined,
         tipoResolucion: Request.tipoResolucion,
         idtipocriterio,
+        link: Request.link,
       };
-
+  
       documentSchema.parse(parsedValues);
-
+  
       const formData = new FormData();
       formData.append("nrodoc", values.nrodoc);
       formData.append("titulo", values.titulo);
@@ -200,10 +189,11 @@ const FormularioDocumento = () => {
         formData.append("estado", "Permanente");
       }
       formData.append("idtipocriterio", parsedValues.idtipocriterio);
-      if (Request.pdf) {
-        formData.append("pdf", Request.pdf);
-      }
 
+      formData.append("link", parsedValues.link);
+      formData.append("usuario", usuario)
+
+  
       const response = await fetch(API_URL + "/resolucion/nuevaresolucion", {
         method: "POST",
         headers: {
@@ -211,7 +201,7 @@ const FormularioDocumento = () => {
         },
         body: formData,
       });
-
+  
       if (response.ok) {
         message.success("¡Documento creado con éxito!");
         navigate("/perfil");
@@ -255,7 +245,31 @@ const FormularioDocumento = () => {
               >
                 <Input placeholder="Número de Documento" />
               </Form.Item>
+
+              <Form.Item
+                label="Link del Documento"
+                name="link"
+                rules={[
+                  {
+                    required: true,
+                    message: "Debe ingresar el link del documento",
+                  },
+                  {
+                    type: "url",
+                    message: "Debe ingresar un enlace válido",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Ingrese el enlace del documento"
+                  value={Request.link}
+                  onChange={(e) =>
+                    setRequest((prev) => ({ ...prev, link: e.target.value }))
+                  }
+                />
+              </Form.Item>
             </div>
+
             <div>
               <Form.Item
                 label="Título"
@@ -264,6 +278,7 @@ const FormularioDocumento = () => {
               >
                 <Input placeholder="Título" />
               </Form.Item>
+              
               <Form.Item
                 label="Fecha"
                 name="fecha"
@@ -371,17 +386,7 @@ const FormularioDocumento = () => {
               </Select>
             </Form.Item>
           )}
-          <Form.Item label="PDF" name="pdf">
-            <Upload
-              accept="application/pdf"
-              beforeUpload={(file) => {
-                setRequest({ ...Request, pdf: file });
-                return false;
-              }}
-            >
-              <Button icon={<UploadOutlined />}>Subir PDF</Button>
-            </Upload>
-          </Form.Item>
+          
           <Form.Item>
             <Space style={{ width: "100%", justifyContent: "center" }}>
               <Button type="primary" htmlType="submit">

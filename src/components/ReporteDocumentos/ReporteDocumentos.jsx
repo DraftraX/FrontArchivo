@@ -1,6 +1,5 @@
-import React from "react";
-import { Table } from "antd"; // Solo importa Table de antd
-import { reportData } from "./data";
+import React, { useState, useEffect } from "react";
+import { Table } from "antd";
 import Navbar from "../Navbar/Navbar";
 import {
   BarChart,
@@ -14,6 +13,9 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { API_URL } from "../../utils/ApiRuta";
+
+const token = localStorage.getItem("token");
 
 // Definir colores para cada tipo de documento
 const documentTypeColors = {
@@ -24,46 +26,90 @@ const documentTypeColors = {
   Constancia: "#f44336", // Rojo
 };
 
-// Función para contar los tipos de documentos
 const countDocumentTypes = (data) => {
   const counts = {};
   data.forEach((item) => {
-    counts[item.DocumentType] = (counts[item.DocumentType] || 0) + 1;
+    counts[item.titulo] = (counts[item.titulo] || 0) + 1;
   });
   return Object.entries(counts).map(([type, count]) => ({ type, count }));
 };
 
 const ReportesDocumentos = () => {
+  const [reportData, setReportData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); 
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
+  // Función para obtener datos del backend
+  const fetchReportData = async (page = 1) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/resolucion/verresolucion/`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener datos del backend ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data && data.content) {
+        setReportData(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
+      } else {
+        console.error("Respuesta inesperada:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReportData(currentPage);
+  }, [currentPage]);
+
   const columns = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "N° de Resolución",
+      dataIndex: "nrodoc",
+      key: "nrodoc",
     },
     {
       title: "Título",
-      dataIndex: "title",
-      key: "title",
+      dataIndex: "titulo",
+      key: "titulo",
     },
     {
       title: "Fecha",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "fecha",
+      key: "fecha",
     },
     {
       title: "Tipo de Documento",
-      dataIndex: "DocumentType",
-      key: "DocumentType",
+      dataIndex: "titulo", 
+      key: "titulo",
     },
   ];
 
   const documentTypeCounts = countDocumentTypes(reportData);
 
-  // Configuración de paginación
   const paginationConfig = {
-    pageSize: 12, // Mostrar 12 documentos por página
-    showSizeChanger: false, // Ocultar el selector de tamaño
-    total: reportData.length, // Total de documentos
+    current: currentPage,
+    pageSize: 10,
+    total: totalElements,
+    showSizeChanger: false,
+    onChange: (page) => setCurrentPage(page),
   };
 
   return (
@@ -78,8 +124,9 @@ const ReportesDocumentos = () => {
             <Table
               dataSource={reportData}
               columns={columns}
-              rowKey="id"
-              pagination={paginationConfig} // Aplicar configuración de paginación
+              rowKey="nrodoc"
+              pagination={paginationConfig}
+              loading={loading}
               bordered
               style={{ backgroundColor: "#ffffff" }}
             />

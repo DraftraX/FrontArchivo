@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Input, Button, Steps, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../../url";
+import { API_URL } from "../utils/ApiRuta";
 import Swal from "sweetalert2";
 const { Step } = Steps;
 

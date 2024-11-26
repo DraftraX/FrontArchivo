@@ -11,7 +11,7 @@ import {
   Typography,
   Card,
 } from "antd";
-import { API_URL } from "../../url";
+import { API_URL } from "../utils/ApiRuta";
 import { z } from "zod";
 
 const { Title } = Typography;

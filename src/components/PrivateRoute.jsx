@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { API_URL } from "../../url.js";
+import { API_URL } from "../utils/ApiRuta.js";
 
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
