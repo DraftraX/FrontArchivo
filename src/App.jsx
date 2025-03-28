@@ -27,6 +27,10 @@ import VerPosgrado from "./modules/GradosyTItulos/VerPosgrado";
 import ReportesDocumentos from "./components/ReporteDocumentos/ReporteDocumentos";
 import ReportesVisitantes from "./components/ReporteVisitantes/ReporteVisitantes";
 
+// SOLICITUDES
+import { SolicitudGrado } from "./modules/Solicitudes/SolicitudGrado";
+import { SolicitudResolucion } from "./modules/Solicitudes/SolicitudResolucion";
+
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
@@ -52,6 +56,8 @@ function App() {
           <Route path="/login" element={<IniciarSesion />} />
           <Route path="/restore" element={<RestablecerContrasena />} />
           <Route path="/newpassword" element={<NuevaContrasena />} />
+          <Route path="/solicitudgrado" element={<SolicitudGrado />} />
+          <Route path="/solicitudresolucion" element={<SolicitudResolucion />} />
 
           {/* Rutas protegidas */}
           <Route path="/updatepassword" element={<PrivateRoute><CambiarContrasena /></PrivateRoute>} />
