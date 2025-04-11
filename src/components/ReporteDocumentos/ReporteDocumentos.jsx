@@ -17,13 +17,13 @@ import { API_URL } from "../../utils/ApiRuta";
 
 const token = localStorage.getItem("token");
 
-// Definir colores para cada tipo de documento
+// Colores definidos por tipo de documento
 const documentTypeColors = {
-  Resolucion: "#4caf50", // Verde
-  Grado: "#2196f3", // Azul
-  Titulo: "#ff9800", // Naranja
-  Doctorado: "#9c27b0", // Púrpura
-  Constancia: "#f44336", // Rojo
+  Resolucion: "#4CAF50",  // Verde
+  Grado: "#2196F3",       // Azul
+  Titulo: "#FF9800",      // Naranja
+  Doctorado: "#9C27B0",   // Púrpura
+  Constancia: "#F44336",  // Rojo
 };
 
 const countDocumentTypes = (data) => {
@@ -37,36 +37,26 @@ const countDocumentTypes = (data) => {
 const ReportesDocumentos = () => {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1); 
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
-  // Función para obtener datos del backend
   const fetchReportData = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${API_URL}/resolucion/verresolucion/`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error al obtener datos del backend ${response.status}`);
-      }
+      const response = await fetch(`${API_URL}/resolucion/verresolucion/`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       const data = await response.json();
       if (data && data.content) {
         setReportData(data.content);
         setTotalPages(data.totalPages);
         setTotalElements(data.totalElements);
-      } else {
-        console.error("Respuesta inesperada:", data);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -97,7 +87,7 @@ const ReportesDocumentos = () => {
     },
     {
       title: "Tipo de Documento",
-      dataIndex: "titulo", 
+      dataIndex: "titulo",
       key: "titulo",
     },
   ];
@@ -112,22 +102,14 @@ const ReportesDocumentos = () => {
     onChange: (page) => setCurrentPage(page),
   };
 
-  const generateRandomColors = (data) => {
-    const colors = {};
-    data.forEach((item) => {
-      colors[item.type] =
-        "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
-    });
-    return colors;
-  };
-
   return (
     <div>
       <Navbar />
       <div style={{ backgroundColor: "#f0f2f5", padding: "20px" }}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
-          <div className="listaReportes">
-            <h2 style={{ textAlign: "center" }}>
+        {/* Fila 1: Título y Tabla */}
+        <div className="mb-6 px-4">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-center text-xl font-semibold mb-4 text-indigo-700">
               Reportes de Documentos Almacenados
             </h2>
             <Table
@@ -137,48 +119,68 @@ const ReportesDocumentos = () => {
               pagination={paginationConfig}
               loading={loading}
               bordered
-              style={{ backgroundColor: "#ffffff" }}
             />
           </div>
-          <div className="graficos">
-            <h3 style={{ textAlign: "center", marginBottom: "20px" }}>
+        </div>
+
+        {/* Fila 2: Gráficos */}
+        <div className="flex flex-col gap-6 px-4">
+          {/* Gráfico de barras */}
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h3 className="text-center text-lg font-semibold mb-4 text-emerald-600">
               Distribución de Tipos de Documentos
             </h3>
             <BarChart
-              width={600}
+              width={window.innerWidth > 1024 ? 600 : 350}
               height={300}
               data={documentTypeCounts}
-              style={{ margin: "0 auto", marginBottom: "20px" }}
+              margin={{ top: 20, right: 30, left: 0, bottom: 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="type" />
+              <XAxis
+                dataKey="type"
+                angle={-45}
+                textAnchor="end"
+                interval={0}
+                height={80}
+              />
               <YAxis />
-              <Tooltip />
+              <Tooltip formatter={(value) => `${value} documentos`} />
               <Legend />
-              <Bar dataKey="count" fill="#8884d8" />
+              <Bar
+                dataKey="count"
+                fill="#6366F1"
+                label={{ position: "top", fill: "#333" }}
+              />
             </BarChart>
+          </div>
 
-            <h3 style={{ textAlign: "center", marginBottom: "20px" }}>
+          {/* Gráfico circular */}
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h3 className="text-center text-lg font-semibold mb-4 text-pink-600">
               Gráfico Circular de Tipos de Documentos
             </h3>
-            <PieChart width={600} height={300} style={{ margin: "0 auto" }}>
+            <PieChart width={window.innerWidth > 1024 ? 600 : 350} height={300}>
               <Pie
                 data={documentTypeCounts}
                 dataKey="count"
                 nameKey="type"
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
+                outerRadius={50}
+                label={({ name, percent }) =>
+                  `${name} (${(percent * 100).toFixed(0)}%)`
+                }
               >
                 {documentTypeCounts.map((entry) => (
                   <Cell
                     key={entry.type}
-                    fill={documentTypeColors[entry.type] || "#ccc"} // fallback en caso no esté definido
+                    fill={documentTypeColors[entry.type] || "#ccc"}
                   />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend />
+              <Tooltip formatter={(value) => `${value} documentos`} />
+              <Legend layout="vertical" align="right" verticalAlign="middle" />
             </PieChart>
           </div>
         </div>
