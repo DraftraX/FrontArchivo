@@ -116,11 +116,6 @@ export default function DocumentoDetalle() {
       campo: "Vencimiento",
       valor: documento.vencimiento,
     },
-    {
-      key: "7",
-      campo: "Tipo de Criterio",
-      valor: documento.tipocriterio,
-    },
   ];
 
   return (
@@ -145,7 +140,9 @@ export default function DocumentoDetalle() {
               className="w-full h-96"
               src={pdfUrl}
               title="Documento PDF"
-              frameBorder="0"
+              width="800" 
+              height="600" 
+              allow="autoplay"
             />
           ) : (
             <div>No se pudo cargar el documento PDF.</div>

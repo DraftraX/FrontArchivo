@@ -76,6 +76,7 @@ const ReporteVisitantes = () => {
       );
 
       const data = await response.json();
+
       setVisitantesData(data.content);
 
       // Procesar datos para el gráfico

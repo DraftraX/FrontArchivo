@@ -29,7 +29,6 @@ const documentSchema = z.object({
   fecha: z.string().nonempty("La fecha es obligatoria"),
   duracion: z.number().min(1, "La duración debe ser mayor a 0").optional(),
   tipoResolucion: z.string().nonempty("El tipo de resolución es obligatorio"),
-  idtipocriterio: z.number().min(1, "El criterio es obligatorio"),
   link: z
     .string()
     .url("Debe ingresar un enlace válido")
@@ -39,7 +38,6 @@ const documentSchema = z.object({
 const FormularioDocumento = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-
   const [Request, setRequest] = useState({
     nrodoc: "",
     titulo: "",
@@ -47,121 +45,16 @@ const FormularioDocumento = () => {
     fecha: "",
     duracion: 1,
     tipoResolucion: "",
-    idtipocriterio: 0,
     link: "",
   });
-
-  const [criterios, setCriterios] = useState([]);
-  const [subCriterios, setSubCriterios] = useState([]);
-  const [subSubCriterios, setSubSubCriterios] = useState([]);
-  const [selectedCriterio, setSelectedCriterio] = useState(null);
-  const [selectedSubCriterio, setSelectedSubCriterio] = useState(null);
-  const [selectedSubSubCriterio, setSelectedSubSubCriterio] = useState(null);
-
-  useEffect(() => {
-    const fetchCriterios = async () => {
-      try {
-        const response = await fetch(
-          API_URL + "/tipocriterio/vercriterio/tipocriterios",
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setCriterios(data.slice(0, 5));
-        } else {
-          console.error("Error al obtener los criterios");
-        }
-      } catch (error) {
-        console.error("Error al obtener los criterios:", error);
-      }
-    };
-
-    fetchCriterios();
-  }, [token]);
-
-  const fetchSubCriterios = async (mainid) => {
-    try {
-      const response = await fetch(
-        `${API_URL}/tipocriterio/vercriterio/criteriomayor/${mainid}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setSubCriterios(data);
-        setSubSubCriterios([]);
-        setSelectedSubCriterio(null);
-        setRequest((prev) => ({ ...prev, idtipocriterio: mainid }));
-      } else {
-        console.error("Error al obtener los sub-criterios");
-      }
-    } catch (error) {
-      console.error("Error al obtener los sub-criterios:", error);
-    }
-  };
-
-  const fetchSubSubCriterios = async (mainid) => {
-    try {
-      const response = await fetch(
-        `${API_URL}/tipocriterio/vercriterio/criteriomayor/${mainid}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setSubSubCriterios(data);
-        setRequest((prev) => ({ ...prev, idtipocriterio: mainid }));
-      } else {
-        console.error("Error al obtener los sub-subcriterios");
-      }
-    } catch (error) {
-      console.error("Error al obtener los sub-subcriterios:", error);
-    }
-  };
 
   const handleTipoResolucionChange = (e) => {
     const tipoResolucion = e.target.value;
     setRequest((prev) => ({ ...prev, tipoResolucion }));
   };
 
-  const handleCriterioChange = (value) => {
-    setSelectedCriterio(value);
-    fetchSubCriterios(value);
-  };
-
-  const handleSubCriterioChange = (value) => {
-    setSelectedSubCriterio(value);
-    fetchSubSubCriterios(value);
-  };
-
-  const handleSubSubCriterioChange = (value) => {
-    setSelectedSubSubCriterio(value);
-  };
-
   const handleSubmit = async (values) => {
     try {
-      const idtipocriterio =
-        subSubCriterios.length > 0 ? selectedSubSubCriterio : selectedSubCriterio;
-      if (!idtipocriterio) {
-        message.error("Debe seleccionar un criterio válido.");
-        return;
-      }
       
       const usuario = localStorage.getItem("username");
 
@@ -171,7 +64,6 @@ const FormularioDocumento = () => {
         duracion:
           Request.tipoResolucion === "Temporal" ? Number(values.duracion) : undefined,
         tipoResolucion: Request.tipoResolucion,
-        idtipocriterio,
         link: Request.link,
       };
   
@@ -188,7 +80,6 @@ const FormularioDocumento = () => {
       } else {
         formData.append("estado", "Permanente");
       }
-      formData.append("idtipocriterio", parsedValues.idtipocriterio);
 
       formData.append("link", parsedValues.link);
       formData.append("usuario", usuario)
@@ -319,71 +210,6 @@ const FormularioDocumento = () => {
               ]}
             >
               <Input type="number" placeholder="Duración (años)" />
-            </Form.Item>
-          )}
-          <Form.Item
-            label="Tipo de Criterio"
-            name="idtipocriterio"
-            rules={[
-              { required: true, message: "Debe seleccionar un criterio" },
-            ]}
-          >
-            <Select
-              placeholder="Seleccione Tipo de Criterio"
-              onChange={handleCriterioChange}
-            >
-              <Option value="">Seleccione Tipo de Criterio</Option>
-              {criterios.map((criterio) => (
-                <Option key={criterio.mainid} value={criterio.mainid}>
-                  {criterio.criteryname}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          {subCriterios.length > 0 && (
-            <Form.Item
-              label="Sub-Criterio"
-              name="subcriterio"
-              rules={[
-                { required: true, message: "Debe seleccionar un sub-criterio" },
-              ]}
-            >
-              <Select
-                placeholder="Seleccione Sub-Criterio"
-                onChange={handleSubCriterioChange}
-              >
-                {subCriterios.map((subCriterio) => (
-                  <Option key={subCriterio.mainid} value={subCriterio.mainid}>
-                    {subCriterio.criteryname}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          )}
-          {subSubCriterios.length > 0 && (
-            <Form.Item
-              label="Sub-Sub-Criterio"
-              name="subsubcriterio"
-              rules={[
-                {
-                  required: true,
-                  message: "Debe seleccionar un sub-subcriterio",
-                },
-              ]}
-            >
-              <Select
-                placeholder="Seleccione Sub-aSub-Criterio"
-                onChange={handleSubSubCriterioChange}
-              >
-                {subSubCriterios.map((subSubCriterio) => (
-                  <Option
-                    key={subSubCriterio.mainid}
-                    value={subSubCriterio.mainid}
-                  >
-                    {subSubCriterio.criteryname}
-                  </Option>
-                ))}
-              </Select>
             </Form.Item>
           )}
           

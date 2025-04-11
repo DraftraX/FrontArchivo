@@ -112,6 +112,15 @@ const ReportesDocumentos = () => {
     onChange: (page) => setCurrentPage(page),
   };
 
+  const generateRandomColors = (data) => {
+    const colors = {};
+    data.forEach((item) => {
+      colors[item.type] =
+        "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+    });
+    return colors;
+  };
+
   return (
     <div>
       <Navbar />
@@ -160,12 +169,11 @@ const ReportesDocumentos = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                label
               >
                 {documentTypeCounts.map((entry) => (
                   <Cell
                     key={entry.type}
-                    fill={documentTypeColors[entry.type]}
+                    fill={documentTypeColors[entry.type] || "#ccc"} // fallback en caso no esté definido
                   />
                 ))}
               </Pie>
