@@ -146,8 +146,8 @@ const ReporteVisitantes = () => {
             </h3>
             {chartData.length > 0 ? (
               <LineChart
-                width={950}
-                height={530}
+                width={675}
+                height={430}
                 data={chartData}
                 style={{ margin: "0 auto" }}
               >
