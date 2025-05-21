@@ -22,23 +22,27 @@ export default function Tablas() {
 
   const fetchDocumentos = async (page, size) => {
     try {
-      const response = await fetch(
-        `${API_URL}/resolucion/verresolucion/`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/resolucion/verresolucion?page=${page - 1}&size=${size}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
+
       const data = await response.json();
       setDocumentos(data.content);
-      setFilteredDocumentos(data.content);
       setTotalElements(data.totalElements);
+
+      // Si no hay filtros, mostramos lo que viene directo del backend
+      if (!filters.nro && !filters.nombre && !filters.fecha) {
+        setFilteredDocumentos(data.content);
+      }
+
     } catch (error) {
       console.error("Error al obtener los documentos:", error);
     }
@@ -49,17 +53,20 @@ export default function Tablas() {
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    const filtered = documentos.filter((doc) => {
-      return (
-        (filters.nro ? doc.nrodoc.includes(filters.nro) : true) &&
-        (filters.nombre
-          ? doc.titulo.toLowerCase().includes(filters.nombre.toLowerCase())
-          : true) &&
-        (filters.fecha ? doc.fecha.includes(filters.fecha) : true)
-      );
-    });
-    setFilteredDocumentos(filtered);
-    setTotalElements(filtered.length);
+    // Si hay filtros activos, filtramos localmente
+    if (filters.nro || filters.nombre || filters.fecha) {
+      const filtered = documentos.filter((doc) => {
+        return (
+          (filters.nro ? doc.nrodoc.includes(filters.nro) : true) &&
+          (filters.nombre ? doc.titulo.toLowerCase().includes(filters.nombre.toLowerCase()) : true) &&
+          (filters.fecha ? doc.fecha.includes(filters.fecha) : true)
+        );
+      });
+      setFilteredDocumentos(filtered);
+    } else {
+      // Si no hay filtros, usamos los datos originales
+      setFilteredDocumentos(documentos);
+    }
   }, [filters, documentos]);
 
   const handleFilterChange = (e) => {
@@ -158,15 +165,18 @@ export default function Tablas() {
         className="custom-table"
         pagination={false}
       />
-      <Pagination
-        className="mt-4"
-        current={currentPage}
-        total={totalElements}
-        pageSize={pageSize}
-        onChange={handleChangePage}
-        showSizeChanger={false}
-        showQuickJumper={false}
-      />
+      {/* Mostrar paginación solo si no hay filtros activos */}
+      {(!filters.nro && !filters.nombre && !filters.fecha) && (
+        <Pagination
+          className="mt-4"
+          current={currentPage}
+          total={totalElements}
+          pageSize={pageSize}
+          onChange={handleChangePage}
+          showSizeChanger={false}
+          showQuickJumper={false}
+        />
+      )}
     </div>
   );
 }

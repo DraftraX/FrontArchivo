@@ -29,8 +29,16 @@ export default function DocumentoDetalle() {
         }
 
         const data = await response.json();
+
+        // Transformar el link de Google Drive a formato embebible
+        let driveLink = data.link;
+        if (driveLink.includes("view")) {
+          driveLink = driveLink.replace("/view", "/preview");
+        }
+
         setDocumento(data);
-        setPdfUrl(data.link);
+        setPdfUrl(driveLink);
+
       } catch (error) {
         setError(error.message);
       } finally {
