@@ -61,7 +61,7 @@ const Reportes = () => {
 
   // Configuración de paginación
   const paginationConfig = {
-    pageSize: 12, // Mostrar 12 documentos por página
+    pageSize: 10, // Mostrar 10 documentos por página
     showSizeChanger: false, // Ocultar el selector de tamaño
     total: reportData.length, // Total de documentos
   };
