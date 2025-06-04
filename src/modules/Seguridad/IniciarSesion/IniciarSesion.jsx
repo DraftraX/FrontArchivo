@@ -63,7 +63,7 @@ export default function IniciarSesion() {
       if (err.errors) {
         message.error(err.errors[0].message);
       } else if (err.response?.data) {
-        message.error(err.response.data.message || "Error al iniciar sesión");
+        message.error(err.response.data.message);
       } else {
         console.error(err);
         message.error("Ha ocurrido un error. Inténtelo nuevamente.");
