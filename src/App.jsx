@@ -14,7 +14,7 @@ import CrearGrado from "./modules/Seguridad/CrearGrado";
 import CrearPosgrado from "./modules/Seguridad/CrearPosgrado";
 import RegistrarVisita from "./modules/Seguridad/RegistrarVisita/RegistrarVisita";
 import Permisos from "./modules/Seguridad/Permisos/Permisos";
-
+import CrearUsuarioDesauth from "./modules/Seguridad/CrearUsuarioDesauth";
 // RESOLUCIONES
 import VistaResoluciones from "./modules/Resoluciones/VistaResoluciones";
 import VerResolucion from "./modules/Resoluciones/VerResolucion";
@@ -34,13 +34,12 @@ import { SolicitudResolucion } from "./modules/Solicitudes/SolicitudResolucion";
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
-  useEffect(() =>
-  {
-    if (process.env.NODE_ENV === 'development') {
-      const isFirstTime = localStorage.getItem('isFirstTime');
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      const isFirstTime = localStorage.getItem("isFirstTime");
       if (!isFirstTime) {
         localStorage.clear();
-        localStorage.setItem('isFirstTime', 'true');
+        localStorage.setItem("isFirstTime", "true");
       }
     }
   }, []);
@@ -55,28 +54,151 @@ function App() {
           {/* Demás rutas */}
           <Route path="/login" element={<IniciarSesion />} />
           <Route path="/restore" element={<RestablecerContrasena />} />
+          <Route path="/registro" element={<CrearUsuarioDesauth />} />
           <Route path="/newpassword" element={<NuevaContrasena />} />
           <Route path="/solicitudgrado" element={<SolicitudGrado />} />
-          <Route path="/solicitudresolucion" element={<SolicitudResolucion />} />
+          <Route
+            path="/solicitudresolucion"
+            element={<SolicitudResolucion />}
+          />
 
           {/* Rutas protegidas */}
-          <Route path="/updatepassword" element={<PrivateRoute><CambiarContrasena /></PrivateRoute>} />
-          <Route path="/paginaprincipal" element={<PrivateRoute><PaginaPrincipal /></PrivateRoute>} />
-          <Route path="/perfil" element={<PrivateRoute><PerfilUsuario /></PrivateRoute>} />
-          <Route path="/create" element={<PrivateRoute><CrearUsuario /></PrivateRoute>} />
-          <Route path="/resoluciones" element={<PrivateRoute><VistaResoluciones /></PrivateRoute>} />
-          <Route path="/verresolucion" element={<PrivateRoute><VerResolucion /></PrivateRoute>} />
-          <Route path="/createresolucion" element={<PrivateRoute><CrearResolucion /></PrivateRoute>} />
-          <Route path="/grados" element={<PrivateRoute><VistaGrados /></PrivateRoute>} />
-          <Route path="/vergrado" element={<PrivateRoute><VerGrado /></PrivateRoute>} />
-          <Route path="/creategrado" element={<PrivateRoute><CrearGrado /></PrivateRoute>} />
-          <Route path="/posgrados" element={<PrivateRoute><VistaPosgrados /></PrivateRoute>} />
-          <Route path="/verposgrado" element={<PrivateRoute><VerPosgrado /></PrivateRoute>} />
-          <Route path="/createposgrado" element={<PrivateRoute><CrearPosgrado /></PrivateRoute>} />
-          <Route path="/reportes-documentos" element={<PrivateRoute><ReportesDocumentos /></PrivateRoute>} />
-          <Route path="/reportes-visitantes" element={<PrivateRoute><ReportesVisitantes /></PrivateRoute>} />
-          <Route path="/visita" element={<PrivateRoute><RegistrarVisita /></PrivateRoute>} />
-          <Route path="/permisos" element={<PrivateRoute><Permisos /></PrivateRoute>} />
+          <Route
+            path="/updatepassword"
+            element={
+              <PrivateRoute>
+                <CambiarContrasena />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/paginaprincipal"
+            element={
+              <PrivateRoute>
+                <PaginaPrincipal />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <PrivateRoute>
+                <PerfilUsuario />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/create"
+            element={
+              <PrivateRoute>
+                <CrearUsuario />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/resoluciones"
+            element={
+              <PrivateRoute>
+                <VistaResoluciones />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/verresolucion"
+            element={
+              <PrivateRoute>
+                <VerResolucion />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/createresolucion"
+            element={
+              <PrivateRoute>
+                <CrearResolucion />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/grados"
+            element={
+              <PrivateRoute>
+                <VistaGrados />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/vergrado"
+            element={
+              <PrivateRoute>
+                <VerGrado />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/creategrado"
+            element={
+              <PrivateRoute>
+                <CrearGrado />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/posgrados"
+            element={
+              <PrivateRoute>
+                <VistaPosgrados />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/verposgrado"
+            element={
+              <PrivateRoute>
+                <VerPosgrado />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/createposgrado"
+            element={
+              <PrivateRoute>
+                <CrearPosgrado />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/reportes-documentos"
+            element={
+              <PrivateRoute>
+                <ReportesDocumentos />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/reportes-visitantes"
+            element={
+              <PrivateRoute>
+                <ReportesVisitantes />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/visita"
+            element={
+              <PrivateRoute>
+                <RegistrarVisita />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/permisos"
+            element={
+              <PrivateRoute>
+                <Permisos />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </div>
     </BrowserRouter>

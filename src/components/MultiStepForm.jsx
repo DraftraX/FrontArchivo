@@ -1,9 +1,28 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Steps, message } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Steps,
+  message,
+  Typography,
+  Card,
+  Space,
+  Select,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../utils/ApiRuta";
-import Swal from "sweetalert2";
+
 const { Step } = Steps;
+const { Title } = Typography;
+const { Option } = Select;
+
+const cargosFijos = [
+  { id: 1, nombre: "ADMINISTRADOR" },
+  { id: 2, nombre: "JEFE ARCHIVO" },
+  { id: 3, nombre: "SECRETARIA" },
+  { id: 4, nombre: "USUARIO" },
+];
 
 const MultiStepForm = () => {
   const [step, setStep] = useState(0);
@@ -20,6 +39,7 @@ const MultiStepForm = () => {
           "dni",
           "address",
           "phone",
+          "cargoid",
         ]);
         setFormData({ ...formData, ...values });
       } else if (step === 1) {
@@ -28,7 +48,6 @@ const MultiStepForm = () => {
       }
       setStep(step + 1);
     } catch (error) {
-      // Handle validation error
       console.error("Validation error:", error);
     }
   };
@@ -39,12 +58,13 @@ const MultiStepForm = () => {
 
   const handleFinish = async (values) => {
     const finalFormData = { ...formData, ...values };
-    const { fname, lname, dni, address, phone, email, pass } = finalFormData;
+    const { fname, lname, dni, address, phone, email, pass, cargoid } =
+      finalFormData;
     const UsuarioRequest = {
       name: fname,
       lastname: lname,
       address: address,
-      cargoid: 1,
+      cargoid: parseInt(cargoid),
       phone: phone,
       dni: dni,
       username: email,
@@ -54,7 +74,7 @@ const MultiStepForm = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(API_URL + "/usuario/nuevousuario", {
+      const response = await fetch(`${API_URL}/usuario/nuevousuario`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,33 +84,35 @@ const MultiStepForm = () => {
       });
 
       if (response.ok) {
-        Swal.fire("Success!", "¡Usuario creado con éxito!", "success");
+        message.success("¡Usuario creado con éxito!");
         navigate("/perfil");
       } else {
-        if (response.status === 500) 
-        {
-          Swal.fire("Error", "El nombre de usuario ya está en uso.", "error");
-        } 
-        else
-        {
+        if (response.status === 500) {
+          message.error("El nombre de usuario ya está en uso.");
+        } else {
           const errorData = await response.json();
           console.error("Error response:", errorData);
-          Swal.fire("Error", "Hubo un problema al crear el usuario", "error");
+          message.error("Hubo un problema al crear el usuario");
         }
       }
     } catch (error) {
-      Swal.fire("Error", "Hubo un problema al crear el usuario", "error");
+      message.error("Hubo un problema al crear el usuario");
       console.error("Error al crear el usuario:", error);
     }
   };
 
   return (
-    <div className="flex justify-center h-screen pt-5">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+    <div className="h-full flex justify-center pt-5">
+      <Card style={{ maxWidth: 1000, width: "100%" }}>
+        <Title level={2} style={{ textAlign: "center" }}>
+          Registro de Nuevo Usuario
+        </Title>
+
         <Steps current={step} className="mb-6">
           <Step title="Detalles Personales" />
           <Step title="Crear tu cuenta" />
         </Steps>
+
         <Form
           form={form}
           layout="vertical"
@@ -104,18 +126,16 @@ const MultiStepForm = () => {
             dni: "",
             cpass: "",
             phone: "",
+            cargoid: "",
           }}
         >
           {step === 0 && (
-            <div className="mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <Form.Item
                 name="fname"
                 label="Nombre"
                 rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingresa tu nombre",
-                  },
+                  { required: true, message: "Por favor ingresa tu nombre" },
                 ]}
               >
                 <Input placeholder="Nombre" />
@@ -124,10 +144,7 @@ const MultiStepForm = () => {
                 name="lname"
                 label="Apellido"
                 rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingresa tu apellido",
-                  },
+                  { required: true, message: "Por favor ingresa tu apellido" },
                 ]}
               >
                 <Input placeholder="Apellido" />
@@ -136,14 +153,8 @@ const MultiStepForm = () => {
                 name="dni"
                 label="DNI"
                 rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingresa tu DNI",
-                  },
-                  {
-                    len: 8,
-                    message: "El DNI debe tener 8 dígitos",
-                  },
+                  { required: true, message: "Por favor ingresa tu DNI" },
+                  { len: 8, message: "El DNI debe tener 8 dígitos" },
                 ]}
               >
                 <Input placeholder="DNI" />
@@ -164,22 +175,35 @@ const MultiStepForm = () => {
                 name="phone"
                 label="Teléfono"
                 rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingresa tu teléfono",
-                  },
-                  {
-                    min: 9,
-                    message: "Número de teléfono inválido",
-                  },
+                  { required: true, message: "Por favor ingresa tu teléfono" },
+                  { min: 9, message: "Número de teléfono inválido" },
                 ]}
               >
                 <Input placeholder="Teléfono" />
               </Form.Item>
+              <Form.Item
+                name="cargoid"
+                label="Tipo de Usuario"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor selecciona un tipo de usuario",
+                  },
+                ]}
+              >
+                <Select placeholder="Seleccione tipo de usuario">
+                  {cargosFijos.map((cargo) => (
+                    <Option key={cargo.id} value={cargo.id}>
+                      {cargo.nombre}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </div>
           )}
+
           {step === 1 && (
-            <div className="mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <Form.Item
                 name="email"
                 label="Correo Electrónico"
@@ -205,7 +229,7 @@ const MultiStepForm = () => {
                     pattern:
                       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
                     message:
-                      "La contraseña debe tener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial",
+                      "Debe tener mayúscula, minúscula, número y carácter especial",
                   },
                 ]}
               >
@@ -237,25 +261,45 @@ const MultiStepForm = () => {
               </Form.Item>
             </div>
           )}
-          <Form.Item className="text-right">
-            {step > 0 && (
-              <Button onClick={prevStep} className="mr-2">
-                Anterior
-              </Button>
-            )}
-            {step < 1 && (
-              <Button type="primary" onClick={nextStep}>
-                Siguiente
-              </Button>
-            )}
-            {step === 1 && (
-              <Button type="primary" htmlType="submit">
-                Enviar
-              </Button>
-            )}
+
+          <Form.Item>
+            <Space style={{ width: "100%", justifyContent: "center" }}>
+              {step > 0 && (
+                <Button className="mr-2" onClick={prevStep}>
+                  Anterior
+                </Button>
+              )}
+              {step === 0 && (
+                <Button
+                  danger
+                  onClick={() => navigate("/perfil")}
+                  className="mr-2"
+                >
+                  Cancelar
+                </Button>
+              )}
+              {step < 1 && (
+                <Button
+                  type="primary"
+                  onClick={nextStep}
+                  className="bg-green-600 hover:bg-green-700 border-green-600"
+                >
+                  Siguiente
+                </Button>
+              )}
+              {step === 1 && (
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="bg-green-600 hover:bg-green-700 border-green-600"
+                >
+                  Enviar
+                </Button>
+              )}
+            </Space>
           </Form.Item>
         </Form>
-      </div>
+      </Card>
     </div>
   );
 };

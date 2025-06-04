@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  Button,
-  Avatar,
-  Typography,
-  Row,
-  Col,
-  Space,
-  Divider,
-  Descriptions,
-  message,
-} from "antd";
+import { Avatar, message } from "antd";
 import {
   UserOutlined,
   PhoneOutlined,
@@ -23,8 +12,6 @@ import {
 
 import { API_URL } from "../utils/ApiRuta";
 
-const { Title, Paragraph } = Typography;
-
 const Perfil = () => {
   const navigate = useNavigate();
 
@@ -34,7 +21,7 @@ const Perfil = () => {
     lastname: "",
     address: "",
     phone: "",
-    fotoPerfil: "https://scontent.flim19-1.fna.fbcdn.net/v/t1.18169-9/15977424_1407659015944818_4808128750698341533_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=53a332&_nc_eui2=AeEYEjNjdHNWKpcPLyfkZ3IX0zt4U9LkBfbTO3hT0uQF9tyr7ejH7aHBWo8s69-fzzbV-HNy3ndpTenxu8tXhuMZ&_nc_ohc=CtbRpmVU4_cQ7kNvgEmFcZL&_nc_zt=23&_nc_ht=scontent.flim19-1.fna&oh=00_AYC_y1M8JEPDqvIOjG6j9_eLcVA31i2nTJjXZB7eyNGWug&oe=673F3DB0",
+    fotoPerfil: "",
     cargoid: "",
   });
 
@@ -45,26 +32,28 @@ const Perfil = () => {
         const username = localStorage.getItem("username");
 
         if (!token || !username) {
-          message.error("No se encontró un token de autenticación o nombre de usuario");
+          message.error(
+            "No se encontró un token de autenticación o nombre de usuario"
+          );
           navigate("/login");
           return;
         }
 
-        const response = await fetch(`${API_URL}/usuario/verusuarioporusername/${username}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_URL}/usuario/verusuarioporusername/${username}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        if (response.ok) 
-        {
+        if (response.ok) {
           const data = await response.json();
           setUserData(data);
-        }
-        else 
-        {
+        } else {
           message.error("Error al obtener los datos del usuario");
         }
       } catch (error) {
@@ -77,121 +66,119 @@ const Perfil = () => {
   }, [navigate]);
 
   return (
-    <div style={{ backgroundColor: "#f0f2f5", padding: "40px" }}>
-      <Row gutter={[24, 24]}>
-        <Col xs={24} md={8}>
-          <Card
-            style={{
-              textAlign: "center",
-              boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2)",
-              borderRadius: "10px",
-            }}
-          >
-            <Avatar
-              size={100}
-              icon={<UserOutlined />}
-              src={userData.fotoPerfil}
-              style={{ marginBottom: "16px" }}
-            />
-            <Title level={4}>{userData.name}</Title>
-            <Paragraph type="secondary">{userData.cargoid}</Paragraph>
-            <Divider />
-            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                block
-                onClick={() => navigate("/createresolucion")}
+    <div className="bg-gray-50 min-h-screen p-6 md:p-12">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+        {/* Panel Izquierdo */}
+        <aside className="md:col-span-2 bg-white rounded-2xl shadow p-10 flex flex-col items-center text-center">
+          <Avatar
+            size={140}
+            icon={<UserOutlined />}
+            src={userData.fotoPerfil}
+            className="mb-6"
+          />
+          <h1 className="text-3xl font-semibold text-gray-900 mb-1">
+            {userData.name || "Usuario"}
+          </h1>
+          <p className="text-sm text-gray-500 mb-6 uppercase tracking-wide">
+            {userData.cargoid || "Cargo"}
+          </p>
+
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                label: "Agregar Resoluciones",
+                icon: <PlusOutlined />,
+                onClick: () => navigate("/createresolucion"),
+              },
+              {
+                label: "Agregar Grados y Títulos",
+                icon: <IdcardOutlined />,
+                onClick: () => navigate("/creategrado"),
+              },
+              {
+                label: "Agregar Maestría y Doctorado",
+                icon: <IdcardOutlined />,
+                onClick: () => navigate("/createposgrado"),
+              },
+              {
+                label: "Registrar Visita",
+                icon: <SettingOutlined />,
+                onClick: () => navigate("/visita"),
+              },
+              {
+                label: "Crear Usuario",
+                icon: <SettingOutlined />,
+                onClick: () => navigate("/create"),
+              },
+              {
+                label: "Actualizar Contraseña",
+                icon: <SettingOutlined />,
+                onClick: () => navigate("/updatepassword"),
+              },
+              {
+                label: "Roles y Permisos",
+                icon: <SettingOutlined />,
+                onClick: () => navigate("/permisos"),
+              },
+            ].map(({ label, icon, onClick }, i) => (
+              <button
+                key={i}
+                onClick={onClick}
+                className="
+                  flex items-center justify-center gap-2 
+                  w-full px-4 py-3 rounded-lg 
+                  bg-gray-100 hover:bg-gray-200 
+                  text-sm text-gray-800 font-medium
+                  transition duration-150
+                  focus:outline-none focus:ring-2 focus:ring-gray-300
+                "
               >
-                Agregar Resoluciones
-              </Button>
-              <Button
-                type="default"
-                icon={<IdcardOutlined />}
-                block
-                onClick={() => navigate("/creategrado")}
-              >
-                Agregar Grados y Títulos
-              </Button>
-              <Button
-                type="default"
-                icon={<IdcardOutlined />}
-                block
-                onClick={() => navigate("/createposgrado")}
-              >
-                Agregar Maestría y Doctorado
-              </Button>
-              <Button
-                type="dashed"
-                icon={<SettingOutlined />}
-                block
-                onClick={() => navigate("/visita")}
-              >
-                Registrar Visita
-              </Button>
-              <Button
-                type="dashed"
-                icon={<SettingOutlined />}
-                block
-                onClick={() => navigate("/create")}
-              >
-                Crear usuario
-              </Button>
-              <Button
-                type="dashed"
-                icon={<SettingOutlined />}
-                block
-                onClick={() => navigate("/updatepassword")}
-              >
-                Actualizar Contraseña
-              </Button>
-              <Button
-                type="dashed"
-                icon={<SettingOutlined />}
-                block
-                onClick={() => navigate("/permisos")}
-              >
-                Roles y Permisos
-              </Button>
-            </Space>
-          </Card>
-        </Col>
-        <Col xs={24} md={16}>
-          <Card
-            style={{
-              boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2)",
-              borderRadius: "10px",
-            }}
-          >
-            <Descriptions title="Información del Usuario" bordered>
-              <Descriptions.Item label="Nombre" span={3}>
-                <Space>
-                  <UserOutlined />
-                  <Paragraph>{userData.name}</Paragraph>
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="Apellido" span={3}>
-                <Space>
-                  <UserOutlined />
-                  <Paragraph>{userData.lastname}</Paragraph>
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="Teléfono" span={3}>
-                <Space>
-                  <PhoneOutlined />
-                  <Paragraph>{userData.phone}</Paragraph>
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="Dirección" span={3}>
-                <Space>
-                  <HomeOutlined />
-                  <Paragraph>{userData.address}</Paragraph>
-                </Space>
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-        </Col>
-      </Row>
+                {icon}
+                {label}
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        {/* Panel Derecho */}
+        <section className="md:col-span-1 bg-white rounded-2xl shadow p-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
+            Información del Usuario
+          </h2>
+          <div className="space-y-5">
+            {[
+              {
+                label: "Nombre",
+                icon: <UserOutlined className="text-gray-500 text-lg" />,
+                value: userData.name,
+              },
+              {
+                label: "Apellido",
+                icon: <UserOutlined className="text-gray-500 text-lg" />,
+                value: userData.lastname,
+              },
+              {
+                label: "Teléfono",
+                icon: <PhoneOutlined className="text-gray-500 text-lg" />,
+                value: userData.phone,
+              },
+              {
+                label: "Dirección",
+                icon: <HomeOutlined className="text-gray-500 text-lg" />,
+                value: userData.address,
+              },
+            ].map(({ label, icon, value }, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="pt-1">{icon}</div>
+                <div>
+                  <p className="text-xs text-gray-400">{label}</p>
+                  <p className="text-base text-gray-800">{value || "-"}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

@@ -1,103 +1,98 @@
-import React, { useState } from "react";
-import { Form, Input, Button, Card, Row, Col, message } from "antd";
-const { Item } = Form;
+import { useState } from "react";
+import { message } from "antd";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { API_URL } from "../../../utils/ApiRuta";
 
 export default function RestablecerContrasena() {
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
 
-  const handleSubmit = () => {
-    // Validar que los campos no estén vacíos
-    if (!email || !username) {
-      message.error("Por favor, complete todos los campos.");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!email.trim()) {
+      message.error("Por favor, ingresa tu correo electrónico.");
       return;
     }
 
-    // Simular el envío del correo
-    message.success("Correo enviado con éxito.");
-    // Aquí podrías redirigir al usuario o limpiar el formulario
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!emailRegex.test(email)) {
+      message.error("Solo se aceptan correos de @gmail.com.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/change-password/enviarcorreo`,
+        {
+          mailTo: email,
+          username: email,
+        }
+      );
+
+      if (response.status === 200) {
+        message.success("Correo enviado con éxito.");
+        setEmail("");
+      } else {
+        message.error("Error al enviar el correo.");
+      }
+    } catch (error) {
+      message.error("Error al conectar con el servidor.");
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-500 ">
-      <Row justify="center" className="w-full">
-        <Col xl={8} lg={10} md={12} sm={20} xs={24}>
-          <Card className="bg-white shadow-lg rounded-lg overflow-hidden h-full">
-            <div className="grid grid-cols-2">
-              <div>
-                <div className="p-1 ">
-                  <h2 className="text-2xl font-semibold mb-4">
-                    ¿Olvidaste tu Contraseña?
-                  </h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Ingresa el correo electrónico con el cual te registraste
-                  </p>
-                  <Form onFinish={handleSubmit}>
-                    <Item
-                      name="email"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Por favor ingresa tu correo electrónico",
-                        },
-                      ]}
-                    >
-                      <Input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full py-2 px-3 border border-gray-300 rounded"
-                      />
-                    </Item>
-                    <Item
-                      name="username"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Por favor ingresa tu nombre de usuario",
-                        },
-                      ]}
-                    >
-                      <Input
-                        type="text"
-                        placeholder="Nombre de usuario"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full py-2 px-3 border border-gray-300 rounded mt-4"
-                      />
-                    </Item>
-                    <Item>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        className="w-full py-2 mt-4 bg-blue-500 hover:bg-blue-600 text-white"
-                      >
-                        RECUPERAR MI CONTRASEÑA
-                      </Button>
-                    </Item>
-                  </Form>
-                  <div className="text-center mt-4">
-                    <a href="/login" className="text-sm text-gray-500">
-                      Recuerdo mi contraseña
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div
-                  className="bg-cover bg-center h-full"
-                  style={{
-                    backgroundImage:
-                      "url(https://unsm.edu.pe/wp-content/uploads/2023/06/logo-1x1-unsm.jpg)",
-                    minHeight: "100%",
-                  }}
-                />
-              </div>
+    <div className="min-h-screen flex items-center justify-center bg-green-500 px-4 py-10">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-8">
+        <h2 className="text-3xl font-bold text-center text-green-700 mb-8">
+          ¿OLVIDASTE TU CONTRASEÑA?
+        </h2>
+        <div className="flex flex-col md:flex-row gap-10">
+          <form onSubmit={handleSubmit} className="flex-1 space-y-5">
+            <p className="text-gray-600 mb-4">
+              Ingresa el correo electrónico con el cual te registraste.
+            </p>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="usuario@gmail.com"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Solo se aceptan correos de @gmail.com
+              </p>
             </div>
-          </Card>
-        </Col>
-      </Row>
+
+            <button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition-colors duration-200 shadow-md"
+            >
+              RECUPERAR MI CONTRASEÑA
+            </button>
+
+            <div className="text-center mt-4 text-green-700">
+              <Link to="/login" className="hover:underline">
+                Recuerdo mi contraseña
+              </Link>
+            </div>
+          </form>
+
+          <div className="flex-1 flex items-center justify-center">
+            <img
+              src="https://unsm.edu.pe/wp-content/uploads/2023/06/logo-1x1-unsm.jpg"
+              alt="Logo UNSM"
+              className="w-64 md:w-96"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

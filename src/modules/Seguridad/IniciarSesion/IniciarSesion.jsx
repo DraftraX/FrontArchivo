@@ -1,188 +1,146 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Card, Row, Col, message } from "antd";
+import { message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import ReCAPTCHA from "react-google-recaptcha";
-import Swal from "sweetalert2";
+import axios from "axios";
 import { API_URL } from "../../../utils/ApiRuta";
 
 const loginSchema = z.object({
   username: z
     .string()
-    .email("Debe ingresar un correo válido")
-    .min(1, "Ingrese su Usuario"),
+    .min(1, "Ingrese su Usuario")
+    .regex(
+      /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|outlook\.es)$/,
+      "Solo se permiten correos de gmail.com, hotmail.com u outlook.es"
+    ),
   password: z.string().min(1, "Ingrese su contraseña"),
 });
 
 export default function IniciarSesion() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState(null);
-  const [errors, setErrors] = useState({});
+  const [captcha, setCaptcha] = useState(null);
   const navigate = useNavigate();
 
-  const handleChangeUsername = (value) => {
-    setUsername(value);
-    if (errors.username) {
-      setErrors((prevErrors) => ({ ...prevErrors, username: null }));
-    }
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleChangePassword = (value) => {
-    setPassword(value);
-    if (errors.password) {
-      setErrors((prevErrors) => ({ ...prevErrors, password: null }));
-    }
-  };
-
-  const handleCaptchaChange = (token) => {
-    setCaptchaToken(token);
-  };
-
-  const handleSubmit = async (values) => {
     try {
-      loginSchema.parse(values);
-      setErrors({});
+      loginSchema.parse({ username, password });
 
-      if (!captchaToken) {
+      if (!captcha) {
         message.error("Por favor, complete el CAPTCHA.");
         return;
       }
 
-      const data = {
-        username: values.username,
-        password: values.password,
-        recaptchaResponse: captchaToken,
-      };
-
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await axios.post(
+        `${API_URL}/auth/login`,
+        {
+          username,
+          password,
+          recaptchaResponse: captcha,
         },
-        body: JSON.stringify(data),
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Respuesta del servidor:", data);
-
-        // Almacenar el token en localStorage
+      if (res.status === 200) {
+        const data = res.data;
         localStorage.setItem("token", data.token);
         localStorage.setItem("username", data.username);
         localStorage.setItem("role", data.role);
 
-        // Mostrar mensaje de éxito con SweetAlert2
-        Swal.fire({
-          icon: "success",
-          title: "Inicio de sesión exitoso",
-          text: "Bienvenido al sistema",
-          confirmButtonText: "Continuar",
-        }).then(() => {
-          // Redirigir después de cerrar SweetAlert2
-          navigate("/paginaprincipal");
-        });
+        message.success("Inicio de sesión exitoso. Bienvenido al sistema.");
+        setTimeout(() => navigate("/paginaprincipal"), 1000);
       } else {
-        const errorData = await response.json();
-        Swal.fire({
-          icon: "error",
-          title: "Error al iniciar sesión",
-          text: errorData.message || "Error al iniciar sesión",
-          confirmButtonText: "Intentar de nuevo",
-        });
+        message.error("Error al iniciar sesión");
       }
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error al iniciar sesión",
-        text: "Ha ocurrido un error. Inténtelo nuevamente.",
-        confirmButtonText: "Cerrar",
-      });
+    } catch (err) {
+      if (err.errors) {
+        message.error(err.errors[0].message);
+      } else if (err.response?.data) {
+        message.error(err.response.data.message || "Error al iniciar sesión");
+      } else {
+        console.error(err);
+        message.error("Ha ocurrido un error. Inténtelo nuevamente.");
+      }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-500">
-      <Card className="bg-white shadow-md rounded-lg overflow-hidden p-6 w-full max-w-4xl">
-        <h2 className="text-xl font-bold text-center text-gray-700 mb-4">
+    <div className="min-h-screen flex items-center justify-center bg-green-500 px-4 py-10">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-8">
+        <h1 className="text-3xl font-bold text-center text-green-700 mb-8">
           ARCHIVERO CENTRAL
-        </h2>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form onFinish={handleSubmit} layout="vertical">
-              <Form.Item
-                label="Usuario"
-                name="username"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingresa tu correo electrónico",
-                  },
-                ]}
-              >
-                <Input
-                  type="email"
-                  placeholder="Ingrese su usuario"
-                  onChange={(e) => handleChangeUsername(e.target.value)}
-                />
-                {errors.username && (
-                  <p className="text-red-500 text-xs italic">
-                    {errors.username}
-                  </p>
-                )}
-              </Form.Item>
-              <Form.Item
-                label="Contraseña"
-                name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "Por favor ingresa tu contraseña",
-                  },
-                ]}
-              >
-                <Input.Password
-                  placeholder="Ingrese su contraseña"
-                  onChange={(e) => handleChangePassword(e.target.value)}
-                />
-                {errors.password && (
-                  <p className="text-red-500 text-xs italic">
-                    {errors.password}
-                  </p>
-                )}
-              </Form.Item>
-              <Form.Item>
-                <ReCAPTCHA
-                  sitekey="6Lcs1U0qAAAAAKrgSA6QXMBD7ziudNsw5jtjCBdF"
-                  onChange={handleCaptchaChange}
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="w-full bg-green-500 hover:bg-green-600"
-                >
-                  Iniciar Sesión
-                </Button>
-              </Form.Item>
-            </Form>
-            <div className="mt-4 text-center">
-              <Link to="/restore" className="hover:text-green-500">
+        </h1>
+
+        <div className="flex flex-col md:flex-row gap-10">
+          <form onSubmit={handleSubmit} className="flex-1 space-y-5" noValidate>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Usuario
+              </label>
+              <input
+                type="email"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                placeholder="ejemplo@correo.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                sitekey="6Lcs1U0qAAAAAKrgSA6QXMBD7ziudNsw5jtjCBdF"
+                onChange={setCaptcha}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition-colors duration-200 shadow-md"
+            >
+              Iniciar Sesión
+            </button>
+
+            <div className="flex justify-between text-sm mt-2 text-green-700">
+              <Link to="/restore" className="hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
+              <Link to="/registro" className="hover:underline">
+                Crear nuevo usuario
+              </Link>
             </div>
-          </Col>
-          <Col span={12} className="flex items-center justify-center">
+          </form>
+
+          <div className="flex-1 flex items-center justify-center">
             <img
-              className="h-auto max-w-full"
               src="https://admision.unsm.edu.pe/ADMISI%C3%93N%20WEB%20_%20UNSM_files/Logo.png"
               alt="Archivero UNSM"
+              className="w-48 md:w-72"
             />
-          </Col>
-        </Row>
-      </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
