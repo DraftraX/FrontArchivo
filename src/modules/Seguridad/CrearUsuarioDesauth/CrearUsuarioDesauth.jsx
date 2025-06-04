@@ -59,12 +59,19 @@ const CrearUsuarioDesauth = () => {
         body: JSON.stringify(UsuarioRequest),
       });
 
-      const data = await response.json();
-      console.log("Respuesta backend:", data);
+      let data = null;
+      try {
+        data = await response.json();
+        console.log("Respuesta backend:", data);
+      } catch (error) {
+        console.log("Respuesta sin contenido JSON.");
+      }
 
       if (response.ok) {
-        message.success("¡Usuario creado con éxito!");
-        navigate("/perfil");
+        message.success(
+          "¡Usuario creado con éxito! Serás redirigido al login."
+        );
+        navigate("/login");
       } else {
         if (response.status === 500) {
           message.error("El nombre de usuario ya está en uso.");
@@ -110,7 +117,106 @@ const CrearUsuarioDesauth = () => {
               }}
             >
               {step === 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                // <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                //   <Form.Item
+                //     name="fname"
+                //     label="Nombre"
+                //     rules={[
+                //       {
+                //         required: true,
+                //         message: "Por favor ingresa tu nombre",
+                //       },
+                //     ]}
+                //   >
+                //     <Input
+                //       placeholder="Nombre"
+                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                //     />
+                //   </Form.Item>
+                //   <Form.Item
+                //     name="lname"
+                //     label="Apellido"
+                //     rules={[
+                //       {
+                //         required: true,
+                //         message: "Por favor ingresa tu apellido",
+                //       },
+                //     ]}
+                //   >
+                //     <Input
+                //       placeholder="Apellido"
+                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                //     />
+                //   </Form.Item>
+                //   <Form.Item
+                //     name="dni"
+                //     label="DNI"
+                //     rules={[
+                //       { required: true, message: "Por favor ingresa tu DNI" },
+                //       { len: 8, message: "El DNI debe tener 8 dígitos" },
+                //     ]}
+                //   >
+                //     <Input
+                //       placeholder="DNI"
+                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                //     />
+                //   </Form.Item>
+                //   <Form.Item
+                //     name="address"
+                //     label="Dirección"
+                //     rules={[
+                //       {
+                //         required: true,
+                //         message: "Por favor ingresa tu dirección",
+                //       },
+                //     ]}
+                //   >
+                //     <Input
+                //       placeholder="Dirección"
+                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                //     />
+                //   </Form.Item>
+                //   <Form.Item
+                //     name="phone"
+                //     label="Teléfono"
+                //     rules={[
+                //       {
+                //         required: true,
+                //         message: "Por favor ingresa tu teléfono",
+                //       },
+                //       { min: 9, message: "Número de teléfono inválido" },
+                //     ]}
+                //   >
+                //     <Input
+                //       placeholder="Teléfono"
+                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                //     />
+                //   </Form.Item>
+                // </div>
+                <div className="grid grid-cols-1 gap-6 mb-8">
+                  <Form.Item
+                    name="email"
+                    label="Correo Electrónico"
+                    rules={[
+                      {
+                        required: true,
+                        type: "email",
+                        message:
+                          "Por favor ingresa un correo electrónico válido",
+                      },
+                    ]}
+                  >
+                    <Input
+                      placeholder="Correo Electrónico"
+                      className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                    />
+                    <a href="">Validar correo Electronico</a>
+                  </Form.Item>
+                </div>
+              )}
+
+              {step === 1 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
                   <Form.Item
                     name="fname"
                     label="Nombre"
@@ -142,19 +248,6 @@ const CrearUsuarioDesauth = () => {
                     />
                   </Form.Item>
                   <Form.Item
-                    name="dni"
-                    label="DNI"
-                    rules={[
-                      { required: true, message: "Por favor ingresa tu DNI" },
-                      { len: 8, message: "El DNI debe tener 8 dígitos" },
-                    ]}
-                  >
-                    <Input
-                      placeholder="DNI"
-                      className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                    />
-                  </Form.Item>
-                  <Form.Item
                     name="address"
                     label="Dirección"
                     rules={[
@@ -169,44 +262,7 @@ const CrearUsuarioDesauth = () => {
                       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
                     />
                   </Form.Item>
-                  <Form.Item
-                    name="phone"
-                    label="Teléfono"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Por favor ingresa tu teléfono",
-                      },
-                      { min: 9, message: "Número de teléfono inválido" },
-                    ]}
-                  >
-                    <Input
-                      placeholder="Teléfono"
-                      className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                    />
-                  </Form.Item>
-                </div>
-              )}
 
-              {step === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <Form.Item
-                    name="email"
-                    label="Correo Electrónico"
-                    rules={[
-                      {
-                        required: true,
-                        type: "email",
-                        message:
-                          "Por favor ingresa un correo electrónico válido",
-                      },
-                    ]}
-                  >
-                    <Input
-                      placeholder="Correo Electrónico"
-                      className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                    />
-                  </Form.Item>
                   <Form.Item
                     name="pass"
                     label="Contraseña"
