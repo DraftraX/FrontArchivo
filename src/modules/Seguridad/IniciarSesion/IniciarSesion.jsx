@@ -11,7 +11,7 @@ const loginSchema = z.object({
     .string()
     .min(1, "Ingrese su Usuario")
     .regex(
-      /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|outlook\.es)$/,
+      /^[a-zA-Z0-9._%+-]+@(gmail\.com)$/,
       "Solo se permiten correos de gmail.com, hotmail.com u outlook.es"
     ),
   password: z.string().min(1, "Ingrese su contraseña"),
@@ -47,6 +47,11 @@ export default function IniciarSesion() {
           },
         }
       );
+      console.log("Datos enviados al backend:", {
+        username,
+        password,
+        recaptchaResponse: captcha,
+      });
 
       if (res.status === 200) {
         const data = res.data;
@@ -111,7 +116,10 @@ export default function IniciarSesion() {
             <div className="flex justify-center">
               <ReCAPTCHA
                 sitekey="6LdpRVUrAAAAAMXUbqkpGhxIchH5GeKh4EU8tX_f"
-                onChange={setCaptcha}
+                onChange={(value) => {
+                  console.log("Token reCAPTCHA recibido:", value);
+                  setCaptcha(value);
+                }}
               />
             </div>
 
