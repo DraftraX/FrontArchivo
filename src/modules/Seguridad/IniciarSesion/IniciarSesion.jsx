@@ -115,7 +115,7 @@ export default function IniciarSesion() {
 
             <div className="flex justify-center">
               <ReCAPTCHA
-                sitekey="6LdpRVUrAAAAABrYHMs4u1x8YxF3m8kf2h4gUDpc"
+                sitekey="6LdpRVUrAAAAAMXUbqkpGhxIchH5GeKh4EU8tX_f"
                 onChange={(value) => {
                   console.log("Token reCAPTCHA recibido:", value);
                   setCaptcha(value);
