@@ -110,7 +110,7 @@ export default function IniciarSesion() {
 
             <div className="flex justify-center">
               <ReCAPTCHA
-                sitekey="6Lcs1U0qAAAAAKrgSA6QXMBD7ziudNsw5jtjCBdF"
+                sitekey="6LdpRVUrAAAAAMXUbqkpGhxIchH5GeKh4EU8tX_f"
                 onChange={setCaptcha}
               />
             </div>
