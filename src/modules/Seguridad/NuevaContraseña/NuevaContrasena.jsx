@@ -72,7 +72,7 @@ export default function NuevaContrasena() {
         title: "Contraseña cambiada",
         text: "Tu contraseña ha sido actualizada exitosamente.",
       }).then(() => {
-        window.location.href = "/login"; // Redirigir a la página de inicio de sesión
+        window.location.href = "/"; // Redirigir a la página de inicio de sesión
       });
     } else {
       Swal.fire({

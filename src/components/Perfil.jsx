@@ -35,7 +35,7 @@ const Perfil = () => {
           message.error(
             "No se encontró un token de autenticación o nombre de usuario"
           );
-          navigate("/login");
+          navigate("/");
           return;
         }
 

@@ -10,7 +10,7 @@ const RutasProtegidas = () => {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate("/login");
+      navigate("/");
     }
   }, [navigate]);
 

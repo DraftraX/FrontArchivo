@@ -36,7 +36,7 @@ export default function Navbar() {
         // Clear all localStorage data
         localStorage.clear();
         message.success("¡Sesión cerrada con éxito!");
-        navigate("/login");
+        navigate("/");
       } else {
         message.error("¡Error al cerrar la sesión!");
         console.error("Error al cerrar la sesión");
@@ -125,7 +125,7 @@ export default function Navbar() {
     {
       key: "logout",
       label: (
-        <a href="/login" onClick={handleLogout} className="flex items-center">
+        <a href="/" onClick={handleLogout} className="flex items-center">
           <ArrowLeftOutlined className="mr-2 " />
           Cerrar sesión
         </a>

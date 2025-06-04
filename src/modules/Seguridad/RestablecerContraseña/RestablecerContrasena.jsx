@@ -78,7 +78,7 @@ export default function RestablecerContrasena() {
             </button>
 
             <div className="text-center mt-4 text-green-700">
-              <Link to="/login" className="hover:underline">
+              <Link to="/" className="hover:underline">
                 Recuerdo mi contraseña
               </Link>
             </div>

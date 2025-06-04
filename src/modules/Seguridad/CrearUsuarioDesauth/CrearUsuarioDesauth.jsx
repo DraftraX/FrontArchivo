@@ -71,7 +71,7 @@ const CrearUsuarioDesauth = () => {
         message.success(
           "¡Usuario creado con éxito! Serás redirigido al login."
         );
-        navigate("/login");
+        navigate("/");
       } else {
         if (response.status === 500) {
           message.error("El nombre de usuario ya está en uso.");
@@ -324,7 +324,7 @@ const CrearUsuarioDesauth = () => {
                   {step === 0 && (
                     <Button
                       danger
-                      onClick={() => navigate("/login")}
+                      onClick={() => navigate("/")}
                       className="mr-2"
                     >
                       Cancelar

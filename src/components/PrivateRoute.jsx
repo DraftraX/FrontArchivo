@@ -4,7 +4,7 @@ import { API_URL } from "../utils/ApiRuta.js";
 
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  return isAuthenticated ? children : <Navigate to="/" />;
 };
 
 export default PrivateRoute;

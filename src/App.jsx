@@ -48,11 +48,8 @@ function App() {
     <BrowserRouter>
       <div>
         <Routes>
-          {/* Ruta inicial */}
-          <Route path="/" element={<Navigate to="/login" />} />
-
           {/* Demás rutas */}
-          <Route path="/login" element={<IniciarSesion />} />
+          <Route path="/" element={<IniciarSesion />} />
           <Route path="/restore" element={<RestablecerContrasena />} />
           <Route path="/registro" element={<CrearUsuarioDesauth />} />
           <Route path="/newpassword" element={<NuevaContrasena />} />
