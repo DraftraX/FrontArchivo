@@ -33,6 +33,7 @@ export default function IniciarSesion() {
         message.error("Por favor, complete el CAPTCHA.");
         return;
       }
+      console.log("Antes del POST, captcha =", captcha);
 
       const res = await axios.post(
         `${API_URL}/auth/login`,
@@ -47,6 +48,7 @@ export default function IniciarSesion() {
           },
         }
       );
+
       console.log("Datos enviados al backend:", {
         username,
         password,
