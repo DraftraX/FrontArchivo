@@ -1,0 +1,7 @@
+{
+  "public": "dist",
+  "clean_urls": false,
+  "routes": [
+    { "source": "/**", "destination": "/index.html" }
+  ]
+}
