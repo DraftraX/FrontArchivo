@@ -8,6 +8,11 @@ import {
   IdcardOutlined,
   PlusOutlined,
   SettingOutlined,
+  FileAddOutlined,
+  UserAddOutlined,
+  LockOutlined,
+  TeamOutlined,
+  SolutionOutlined,
 } from "@ant-design/icons";
 
 import { API_URL } from "../utils/ApiRuta";
@@ -65,6 +70,62 @@ const Perfil = () => {
     fetchUserData();
   }, [navigate]);
 
+  // Función para determinar qué opciones mostrar según el cargo
+  const getPermittedOptions = () => {
+    const options = [
+      {
+        label: "Agregar Resoluciones",
+        icon: <FileAddOutlined />,
+        onClick: () => navigate("/createresolucion"),
+        roles: ["ADMINISTRADOR", "JEFE ARCHIVO", "SECRETARIA"],
+      },
+      {
+        label: "Agregar Grados y Títulos",
+        icon: <IdcardOutlined />,
+        onClick: () => navigate("/creategrado"),
+        roles: ["ADMINISTRADOR", "JEFE ARCHIVO", "SECRETARIA"],
+      },
+      {
+        label: "Agregar Maestría y Doctorado",
+        icon: <SolutionOutlined />,
+        onClick: () => navigate("/createposgrado"),
+        roles: ["ADMINISTRADOR", "JEFE ARCHIVO", "SECRETARIA"],
+      },
+      {
+        label: "Registrar Visita",
+        icon: <PlusOutlined />,
+        onClick: () => navigate("/visita"),
+        roles: ["ADMINISTRADOR", "JEFE ARCHIVO", "SECRETARIA"],
+      },
+      {
+        label: "Crear Usuario",
+        icon: <UserAddOutlined />,
+        onClick: () => navigate("/create"),
+        roles: ["ADMINISTRADOR", "JEFE ARCHIVO"],
+      },
+      {
+        label: "Actualizar Contraseña",
+        icon: <LockOutlined />,
+        onClick: () => navigate("/updatepassword"),
+        roles: ["ADMINISTRADOR", "JEFE ARCHIVO", "SECRETARIA", "USUARIO"],
+      },
+      {
+        label: "Roles y Permisos",
+        icon: <TeamOutlined />,
+        onClick: () => navigate("/permisos"),
+        roles: ["ADMINISTRADOR"],
+      },
+    ];
+
+    // Si el usuario es ADMINISTRADOR, mostrar todas las opciones
+    if (userData.cargoid === "ADMINISTRADOR") {
+      return options;
+    }
+
+    // Para otros roles, filtrar las opciones según el rol
+    return options.filter((option) => option.roles.includes(userData.cargoid));
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen p-6 md:p-12">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -84,53 +145,18 @@ const Perfil = () => {
           </p>
 
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              {
-                label: "Agregar Resoluciones",
-                icon: <PlusOutlined />,
-                onClick: () => navigate("/createresolucion"),
-              },
-              {
-                label: "Agregar Grados y Títulos",
-                icon: <IdcardOutlined />,
-                onClick: () => navigate("/creategrado"),
-              },
-              {
-                label: "Agregar Maestría y Doctorado",
-                icon: <IdcardOutlined />,
-                onClick: () => navigate("/createposgrado"),
-              },
-              {
-                label: "Registrar Visita",
-                icon: <SettingOutlined />,
-                onClick: () => navigate("/visita"),
-              },
-              {
-                label: "Crear Usuario",
-                icon: <SettingOutlined />,
-                onClick: () => navigate("/create"),
-              },
-              {
-                label: "Actualizar Contraseña",
-                icon: <SettingOutlined />,
-                onClick: () => navigate("/updatepassword"),
-              },
-              {
-                label: "Roles y Permisos",
-                icon: <SettingOutlined />,
-                onClick: () => navigate("/permisos"),
-              },
-            ].map(({ label, icon, onClick }, i) => (
+            {getPermittedOptions().map(({ label, icon, onClick }, i) => (
               <button
                 key={i}
                 onClick={onClick}
                 className="
                   flex items-center justify-center gap-2 
                   w-full px-4 py-3 rounded-lg 
-                  bg-gray-100 hover:bg-gray-200 
+                  bg-gray-100 hover:bg-green-100 
                   text-sm text-gray-800 font-medium
                   transition duration-150
-                  focus:outline-none focus:ring-2 focus:ring-gray-300
+                  focus:outline-none focus:ring-2 focus:ring-green-300
+                  border border-transparent hover:border-green-300
                 "
               >
                 {icon}

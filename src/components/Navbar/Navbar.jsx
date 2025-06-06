@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Menu, Dropdown, Layout, message } from "antd";
 import {
   UserOutlined,
@@ -13,6 +14,53 @@ const { Header } = Layout;
 export default function Navbar() {
   const navigate = useNavigate();
   const isAuthenticated = true;
+  const [userCargo, setUserCargo] = useState("");
+
+  // Obtener el cargo del usuario al cargar el componente
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+
+        if (!token || !username) {
+          return;
+        }
+
+        const response = await fetch(
+          `${API_URL}/usuario/verusuarioporusername/${username}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserCargo(data.cargoid);
+        }
+      } catch (error) {
+        console.error("Error al obtener los datos del usuario:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Función para determinar si un elemento del menú debería mostrarse según el cargo
+  const shouldShowMenuItem = (item) => {
+    // Si no hay restricciones definidas, se muestra a todos
+    if (!item.roles) return true;
+    
+    // Si el usuario es ADMINISTRADOR, ve todo
+    if (userCargo === "ADMINISTRADOR") return true;
+    
+    // Para otros roles, verificar si tienen permiso
+    return item.roles.includes(userCargo);
+  };
 
   const handleNavigation = (href, message) => {
     localStorage.setItem("navMessage", message);
@@ -48,45 +96,50 @@ export default function Navbar() {
   };
 
   const menuItems = (children) =>
-    children.map((child) => ({
-      key: child.name,
-      label: (
-        <span
-          onClick={() => handleNavigation(child.href, child.message)}
-          className="flex items-center "
-        >
-          {child.icon && <span className="mr-2 ">{child.icon}</span>}
-          {child.name}
-        </span>
-      ),
-    }));
+    children
+      .filter(child => shouldShowMenuItem(child))
+      .map((child) => ({
+        key: child.name,
+        label: (
+          <span
+            onClick={() => handleNavigation(child.href, child.message)}
+            className="flex items-center "
+          >
+            {child.icon && <span className="mr-2 ">{child.icon}</span>}
+            {child.name}
+          </span>
+        ),
+      }));
 
-  const navigationItems = navigation.map((item) =>
-    item.children
-      ? {
-          key: item.name,
-          label: (
-            <span className="flex items-center">
-              {item.icon && <span className="mr-2">{item.icon}</span>}
-              {item.name}
-            </span>
-          ),
-          children: menuItems(item.children),
-        }
-      : {
-          key: item.name,
-          label: (
-            <a
-              onClick={() => handleNavigation(item.href)}
-              className="flex items-center"
-            >
-              {item.icon && <span className="mr-2">{item.icon}</span>}
-              {item.name}
-            </a>
-          ),
-        }
-  );
+  const navigationItems = navigation
+    .filter(item => shouldShowMenuItem(item))
+    .map((item) =>
+      item.children
+        ? {
+            key: item.name,
+            label: (
+              <span className="flex items-center">
+                {item.icon && <span className="mr-2">{item.icon}</span>}
+                {item.name}
+              </span>
+            ),
+            children: menuItems(item.children),
+          }
+        : {
+            key: item.name,
+            label: (
+              <a
+                onClick={() => handleNavigation(item.href)}
+                className="flex items-center"
+              >
+                {item.icon && <span className="mr-2">{item.icon}</span>}
+                {item.name}
+              </a>
+            ),
+          }
+    );
 
+  // Definir permisos para los elementos del menú de usuario
   const userMenuItems = [
     {
       key: "perfil",
@@ -96,6 +149,7 @@ export default function Navbar() {
           Tu perfil
         </a>
       ),
+      roles: ["ADMINISTRADOR", "JEFE ARCHIVO", "SECRETARIA", "USUARIO"]
     },
     {
       key: "Reporte Visitantes",
@@ -108,6 +162,7 @@ export default function Navbar() {
           Reporte Visitantes
         </a>
       ),
+      roles: ["ADMINISTRADOR", "JEFE ARCHIVO"]
     },
     {
       key: "Reporte Documentos",
@@ -120,8 +175,8 @@ export default function Navbar() {
           Reporte Documentos
         </a>
       ),
+      roles: ["ADMINISTRADOR", "JEFE ARCHIVO"]
     },
-
     {
       key: "logout",
       label: (
@@ -130,8 +185,12 @@ export default function Navbar() {
           Cerrar sesión
         </a>
       ),
+      roles: ["ADMINISTRADOR", "JEFE ARCHIVO", "SECRETARIA", "USUARIO"]
     },
   ];
+
+  // Filtrar los elementos del menú de usuario según el cargo
+  const filteredUserMenuItems = userMenuItems.filter(item => shouldShowMenuItem(item));
 
   return (
     <Layout>
@@ -154,7 +213,7 @@ export default function Navbar() {
         {isAuthenticated && (
           <Dropdown
             overlay={
-              <Menu items={userMenuItems} className="bg-white text-blacks" />
+              <Menu items={filteredUserMenuItems} className="bg-white text-blacks" />
             }
             trigger={["click"]}
           >

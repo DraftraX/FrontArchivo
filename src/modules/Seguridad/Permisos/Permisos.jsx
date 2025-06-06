@@ -1,145 +1,258 @@
-import React, { useState } from "react";
-import { Typography, Checkbox, Button, Modal, message, Select } from "antd";
+import React, { useState, useEffect } from "react";
+import { Typography, Button, Modal, message, Select, Table, Tag, Space } from "antd";
 import Navbar from "../../../components/Navbar/Navbar";
+import { API_URL } from "../../../utils/ApiRuta";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const Permisos = () => {
-  const [modulos, setModulos] = useState([
-    {
-      id: 1,
-      nombre: "Usuarios",
-      submodulos: ["Crear"],
-    },
-    {
-      id: 2,
-      nombre: "Resoluciones",
-      submodulos: ["Registrar", "Visualizar", "Filtrar"],
-    },
-    { id: 3, nombre: "Visitantes", submodulos: ["Registrar"] },
-    { id: 4, nombre: "Reportes", submodulos: ["Visualizar", "Exportar"] },
+  const [usuarios, setUsuarios] = useState([]);
+  const [cargos, setCargos] = useState([
+    { id: 2, nombre: "JEFE ARCHIVO" },
+    { id: 3, nombre: "SECRETARIA" },
+    { id: 4, nombre: "USUARIO" }
   ]);
-  const [permisos, setPermisos] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [usuariosSeleccionados, setUsuariosSeleccionados] = useState([]);
-  const [perfilesSeleccionados, setPerfilesSeleccionados] = useState([]);
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+  const [nuevoCargoId, setNuevoCargoId] = useState(null);
 
-  const handleGuardarPermisos = () => {
-    // Lógica para guardar los permisos
-    message.success("Permisos guardados exitosamente");
-    setModalVisible(false);
-  };
-
-  const handleSeleccionModulo = (moduloId) => {
-    const moduloIndex = modulos.findIndex((modulo) => modulo.id === moduloId);
-    const submodulos = modulos[moduloIndex].submodulos;
-    const nuevosPermisos = [...permisos];
-
-    if (nuevosPermisos.includes(moduloId)) {
-      // Si el módulo ya está seleccionado, lo eliminamos
-      nuevosPermisos.splice(nuevosPermisos.indexOf(moduloId), 1);
-      submodulos.forEach((submodulo) => {
-        nuevosPermisos.splice(nuevosPermisos.indexOf(submodulo), 1);
-      });
-    } else {
-      // Si el módulo no está seleccionado, lo agregamos y agregamos sus submódulos
-      nuevosPermisos.push(moduloId);
-      submodulos.forEach((submodulo) => {
-        if (!nuevosPermisos.includes(submodulo)) {
-          nuevosPermisos.push(submodulo);
+  // Cargar usuarios desde el backend
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        
+        if (!token) {
+          message.error("No se encontró un token de autenticación");
+          return;
         }
+        
+        const response = await fetch(`${API_URL}/usuario/usuarios`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Filtrar usuarios ADMINISTRADOR
+          const filteredUsers = data.filter(user => user.cargoid !== "ADMINISTRADOR");
+          setUsuarios(filteredUsers);
+        } else {
+          message.error("Error al obtener los usuarios");
+        }
+      } catch (error) {
+        console.error("Error al obtener los usuarios:", error);
+        message.error("Error de conexión");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUsuarios();
+  }, []);
+
+  // Función para abrir el modal de cambio de rol
+  const handleCambiarRol = (usuario) => {
+    setUsuarioSeleccionado(usuario);
+    
+    // Encontrar el ID del cargo actual
+    const cargoActual = cargos.find(c => c.nombre === usuario.cargoid);
+    setNuevoCargoId(cargoActual ? cargoActual.id : null);
+    
+    setModalVisible(true);
+  };
+
+  // Función para guardar el cambio de rol
+  const handleGuardarCambio = async () => {
+    if (!usuarioSeleccionado || !nuevoCargoId) {
+      message.error("Selecciona un cargo válido");
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const token = localStorage.getItem("token");
+      const cargoSeleccionado = cargos.find(c => c.id === nuevoCargoId);
+      
+      // Aquí harías la llamada al backend para actualizar el cargo
+      // Este es un ejemplo, el endpoint y payload deben ajustarse a tu API
+      const response = await fetch(`${API_URL}/usuario/actualizar-cargo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          usuarioId: usuarioSeleccionado.id,
+          cargoId: nuevoCargoId,
+          cargoNombre: cargoSeleccionado.nombre
+        }),
       });
+      
+      if (response.ok) {
+        // Actualizar la lista de usuarios localmente
+        setUsuarios(usuarios.map(user => {
+          if (user.id === usuarioSeleccionado.id) {
+            return { ...user, cargoid: cargoSeleccionado.nombre };
+          }
+          return user;
+        }));
+        
+        message.success(`Rol de ${usuarioSeleccionado.name} actualizado a ${cargoSeleccionado.nombre}`);
+        setModalVisible(false);
+      } else {
+        message.error("Error al actualizar el rol del usuario");
+      }
+    } catch (error) {
+      console.error("Error al actualizar el rol:", error);
+      message.error("Error de conexión");
+    } finally {
+      setLoading(false);
     }
-
-    setPermisos(nuevosPermisos);
   };
 
-  const handleSeleccionSubmodulo = (submodulo) => {
-    const nuevosPermisos = [...permisos];
-    if (nuevosPermisos.includes(submodulo)) {
-      nuevosPermisos.splice(nuevosPermisos.indexOf(submodulo), 1);
-    } else {
-      nuevosPermisos.push(submodulo);
-    }
-    setPermisos(nuevosPermisos);
-  };
-
-  const handleSeleccionUsuario = (usuarios) => {
-    setUsuariosSeleccionados(usuarios);
-  };
-
-  const handleSeleccionPerfil = (perfiles) => {
-    setPerfilesSeleccionados(perfiles);
-  };
+  // Configuración de la tabla
+  const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: '10%',
+    },
+    {
+      title: 'Nombre',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text, record) => `${record.name} ${record.lastname || ''}`,
+    },
+    {
+      title: 'Dirección',
+      dataIndex: 'address',
+      key: 'address',
+    },
+    {
+      title: 'Teléfono',
+      dataIndex: 'phone',
+      key: 'phone',
+    },
+    {
+      title: 'Cargo Actual',
+      dataIndex: 'cargoid',
+      key: 'cargoid',
+      render: (text) => {
+        let color = 'green';
+        if (text === 'SECRETARIA') {
+          color = 'blue';
+        } else if (text === 'USUARIO') {
+          color = 'gray';
+        }
+        return (
+          <Tag color={color}>
+            {text}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Acciones',
+      key: 'action',
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          onClick={() => handleCambiarRol(record)}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          Cambiar Rol
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div>
       <Navbar />
       <div className="container mx-auto p-4">
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <Title level={2}>Asignar Permisos</Title>
-          <div className="mb-4">
-            <Select
-              mode="multiple"
-              placeholder="Seleccionar Usuarios"
-              style={{ width: "100%" }}
-              onChange={handleSeleccionUsuario}
-              value={usuariosSeleccionados}
-            >
-              <Option key="usuario1">Usuario 1</Option>
-              <Option key="usuario2">Usuario 2</Option>
-              <Option key="usuario3">Usuario 3</Option>
-            </Select>
-          </div>
-          <div className="mb-4">
-            <Select
-              mode="multiple"
-              placeholder="Seleccionar Perfiles"
-              style={{ width: "100%" }}
-              onChange={handleSeleccionPerfil}
-              value={perfilesSeleccionados}
-            >
-              <Option key="perfil1">Perfil 1</Option>
-              <Option key="perfil2">Perfil 2</Option>
-              <Option key="perfil3">Perfil 3</Option>
-            </Select>
-          </div>
-          {modulos.map((modulo) => (
-            <div key={modulo.id} className="mb-4">
-              <Checkbox
-                onChange={() => handleSeleccionModulo(modulo.id)}
-                checked={permisos.includes(modulo.id)}
-              >
-                {modulo.nombre}
-              </Checkbox>
-              <div className="ml-8">
-                {modulo.submodulos.map((submodulo, index) => (
-                  <div key={index} className="ml-4">
-                    <Checkbox
-                      onChange={() => handleSeleccionSubmodulo(submodulo)}
-                      checked={permisos.includes(submodulo)}
-                    >
-                      {submodulo}
-                    </Checkbox>
-                  </div>
-                ))}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <Title level={2} className="mb-6">Gestión de Roles de Usuarios</Title>
+          
+          <Table 
+            columns={columns} 
+            dataSource={usuarios}
+            rowKey="id"
+            loading={loading}
+            pagination={{ pageSize: 10 }}
+            className="mb-6"
+          />
+          
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <Title level={4} className="text-gray-700">Información de Roles</Title>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="p-3 border rounded-lg">
+                <Tag color="green" className="mb-2">JEFE ARCHIVO</Tag>
+                <p className="text-sm text-gray-600">Gestión completa del archivo y su personal</p>
+              </div>
+              <div className="p-3 border rounded-lg">
+                <Tag color="blue" className="mb-2">SECRETARIA</Tag>
+                <p className="text-sm text-gray-600">Operaciones diarias y registro de documentos</p>
+              </div>
+              <div className="p-3 border rounded-lg">
+                <Tag color="gray" className="mb-2">USUARIO</Tag>
+                <p className="text-sm text-gray-600">Solo gestión personal, acceso básico</p>
               </div>
             </div>
-          ))}
-          <Button type="primary" onClick={() => setModalVisible(true)}>
-            Guardar Permisos
-          </Button>
+          </div>
         </div>
       </div>
 
       <Modal
-        title="Confirmación"
-        visible={modalVisible}
-        onOk={handleGuardarPermisos}
+        title="Cambiar Rol de Usuario"
+        open={modalVisible}
+        onOk={handleGuardarCambio}
         onCancel={() => setModalVisible(false)}
+        confirmLoading={loading}
       >
-        <p>¿Está seguro que desea guardar los permisos seleccionados?</p>
+        {usuarioSeleccionado && (
+          <div>
+            <p className="mb-4">
+              Cambiar el rol de <strong>{usuarioSeleccionado.name} {usuarioSeleccionado.lastname}</strong>
+            </p>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Rol actual:
+              </label>
+              <Tag color={
+                usuarioSeleccionado.cargoid === 'JEFE ARCHIVO' ? 'green' : 
+                usuarioSeleccionado.cargoid === 'SECRETARIA' ? 'blue' : 'gray'
+              }>
+                {usuarioSeleccionado.cargoid}
+              </Tag>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nuevo rol:
+              </label>
+              <Select
+                style={{ width: '100%' }}
+                value={nuevoCargoId}
+                onChange={setNuevoCargoId}
+              >
+                {cargos.map(cargo => (
+                  <Option key={cargo.id} value={cargo.id}>
+                    {cargo.nombre}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
