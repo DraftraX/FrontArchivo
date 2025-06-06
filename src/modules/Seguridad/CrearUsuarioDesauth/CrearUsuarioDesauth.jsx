@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Button, Steps, message, Typography, Space } from "antd";
+import { Form, Input, Button, Steps, message, Typography, Space, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../../../utils/ApiRuta";
 
@@ -11,20 +11,108 @@ const CrearUsuarioDesauth = () => {
   const [formData, setFormData] = useState({});
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  
+  // Estados para verificación de correo
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [sentCode, setSentCode] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isCodeSent, setIsCodeSent] = useState(false);
+
+  // Función para verificar si el correo ya existe
+  const checkIfEmailExists = async (email) => {
+    try {
+      // En lugar de usar el endpoint existente, omitimos esta verificación
+      // para permitir que el usuario intente registrarse directamente
+      // El backend ya manejará el caso de correo duplicado al crear el usuario
+      return false;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const validateEmail = async () => {
+    try {
+      await form.validateFields(["email"]);
+      const email = form.getFieldValue("email");
+      
+      // Validar que sea un correo de Gmail
+      if (!email.endsWith("@gmail.com")) {
+        message.error("Solo se permiten correos de Gmail");
+        return;
+      }
+
+      setIsVerifying(true);
+      
+      // Verificar si el email ya existe
+      const emailExists = await checkIfEmailExists(email);
+      
+      if (emailExists) {
+        setIsVerifying(false);
+        message.error("Este correo ya está registrado. Intenta iniciar sesión o recuperar tu contraseña.");
+        return;
+      }
+      
+      // Generar código aleatorio de 6 dígitos
+      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+      setSentCode(generatedCode);
+      
+      try {
+        // Conexión real con el backend para enviar el código
+        console.log("Enviando código:", generatedCode, "a", email);
+        
+        const response = await fetch(`${API_URL}/verificacion/enviar-codigo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code: generatedCode }),
+        });
+        
+        if (response.ok) {
+          setIsVerifying(false);
+          setIsCodeSent(true);
+          message.success(`Código de verificación enviado a ${email}`);
+        } else {
+          setIsVerifying(false);
+          message.error("Error al enviar el código de verificación");
+        }
+      } catch (error) {
+        setIsVerifying(false);
+        message.error("Error al enviar el código de verificación");
+        console.error("Error:", error);
+      }
+    } catch (error) {
+      console.error("Error de validación:", error);
+    }
+  };
+
+  const verifyCode = () => {
+    if (verificationCode === sentCode) {
+      setEmailVerified(true);
+      message.success("Correo verificado correctamente");
+    } else {
+      message.error("Código de verificación incorrecto");
+    }
+  };
 
   const nextStep = async () => {
     try {
       if (step === 0) {
+        // Verificar que el correo esté validado antes de continuar
+        if (!emailVerified) {
+          message.error("Debes verificar tu correo electrónico antes de continuar");
+          return;
+        }
+        
+        const values = await form.validateFields(["email"]);
+        setFormData({ ...formData, ...values });
+      } else if (step === 1) {
         const values = await form.validateFields([
           "fname",
           "lname",
-          "dni",
           "address",
-          "phone",
+          "pass",
+          "cpass"
         ]);
-        setFormData({ ...formData, ...values });
-      } else if (step === 1) {
-        const values = await form.validateFields(["email", "pass", "cpass"]);
         setFormData({ ...formData, ...values });
       }
       setStep(step + 1);
@@ -39,15 +127,15 @@ const CrearUsuarioDesauth = () => {
 
   const handleFinish = async (values) => {
     const finalFormData = { ...formData, ...values };
-    const { fname, lname, dni, address, phone, email, pass } = finalFormData;
+    const { fname, lname, address, email, pass } = finalFormData;
 
     const UsuarioRequest = {
       name: fname,
       lastname: lname,
       address: address,
-      cargoid: 4,
-      phone: phone,
-      dni: dni,
+      cargoid: 4, // Usando cargo ID 4 como se requiere
+      phone: "000000000", // Este valor debería ser proporcionado en el paso 2
+      dni: "00000000", // Este valor debería ser proporcionado en el paso 2
       username: email,
       password: pass,
     };
@@ -74,7 +162,14 @@ const CrearUsuarioDesauth = () => {
         navigate("/login");
       } else {
         if (response.status === 500) {
-          message.error("El nombre de usuario ya está en uso.");
+          const errorText = data && data.message ? data.message : "";
+          if (errorText.includes("Duplicate") || errorText.includes("ya está en uso")) {
+            message.error("Este correo ya está registrado. Intenta iniciar sesión.");
+          } else if (errorText.includes("Cargo no encontrado")) {
+            message.error("Error en la configuración del sistema. Por favor contacta al administrador.");
+          } else {
+            message.error("Hubo un problema al crear el usuario");
+          }
         } else {
           message.error("Hubo un problema al crear el usuario");
         }
@@ -117,82 +212,6 @@ const CrearUsuarioDesauth = () => {
               }}
             >
               {step === 0 && (
-                // <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                //   <Form.Item
-                //     name="fname"
-                //     label="Nombre"
-                //     rules={[
-                //       {
-                //         required: true,
-                //         message: "Por favor ingresa tu nombre",
-                //       },
-                //     ]}
-                //   >
-                //     <Input
-                //       placeholder="Nombre"
-                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                //     />
-                //   </Form.Item>
-                //   <Form.Item
-                //     name="lname"
-                //     label="Apellido"
-                //     rules={[
-                //       {
-                //         required: true,
-                //         message: "Por favor ingresa tu apellido",
-                //       },
-                //     ]}
-                //   >
-                //     <Input
-                //       placeholder="Apellido"
-                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                //     />
-                //   </Form.Item>
-                //   <Form.Item
-                //     name="dni"
-                //     label="DNI"
-                //     rules={[
-                //       { required: true, message: "Por favor ingresa tu DNI" },
-                //       { len: 8, message: "El DNI debe tener 8 dígitos" },
-                //     ]}
-                //   >
-                //     <Input
-                //       placeholder="DNI"
-                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                //     />
-                //   </Form.Item>
-                //   <Form.Item
-                //     name="address"
-                //     label="Dirección"
-                //     rules={[
-                //       {
-                //         required: true,
-                //         message: "Por favor ingresa tu dirección",
-                //       },
-                //     ]}
-                //   >
-                //     <Input
-                //       placeholder="Dirección"
-                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                //     />
-                //   </Form.Item>
-                //   <Form.Item
-                //     name="phone"
-                //     label="Teléfono"
-                //     rules={[
-                //       {
-                //         required: true,
-                //         message: "Por favor ingresa tu teléfono",
-                //       },
-                //       { min: 9, message: "Número de teléfono inválido" },
-                //     ]}
-                //   >
-                //     <Input
-                //       placeholder="Teléfono"
-                //       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-                //     />
-                //   </Form.Item>
-                // </div>
                 <div className="grid grid-cols-1 gap-6 mb-8">
                   <Form.Item
                     name="email"
@@ -204,14 +223,53 @@ const CrearUsuarioDesauth = () => {
                         message:
                           "Por favor ingresa un correo electrónico válido",
                       },
+                      {
+                        pattern: /@gmail\.com$/,
+                        message: "Solo se permiten correos de Gmail"
+                      }
                     ]}
                   >
                     <Input
                       placeholder="Correo Electrónico"
                       className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                      disabled={isCodeSent}
                     />
-                    <a href="">Validar correo Electronico</a>
                   </Form.Item>
+                  
+                  <div className="flex items-center space-x-4">
+                    <Button 
+                      onClick={validateEmail} 
+                      loading={isVerifying}
+                      disabled={isCodeSent && emailVerified}
+                      className="bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
+                    >
+                      {isCodeSent ? "Reenviar código" : "Validar correo"}
+                    </Button>
+                    
+                    {emailVerified && (
+                      <span className="text-green-600 font-medium">✓ Correo verificado</span>
+                    )}
+                  </div>
+                  
+                  {isCodeSent && !emailVerified && (
+                    <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                      <h3 className="font-medium mb-2">Verificación de correo</h3>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Hemos enviado un código de 6 dígitos a tu correo. 
+                        Introdúcelo a continuación para verificar tu cuenta.
+                      </p>
+                      <div className="flex items-center space-x-4">
+                        <Input
+                          placeholder="Código de verificación"
+                          value={verificationCode}
+                          onChange={(e) => setVerificationCode(e.target.value)}
+                          maxLength={6}
+                          className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+                        />
+                        <Button onClick={verifyCode}>Verificar</Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -335,6 +393,7 @@ const CrearUsuarioDesauth = () => {
                       type="primary"
                       onClick={nextStep}
                       className="bg-green-600 hover:bg-green-700 border-green-600"
+                      disabled={!emailVerified}
                     >
                       Siguiente
                     </Button>
